@@ -1,0 +1,13 @@
+Reference code to build a basic network (server -> router -> clients) using Python. 
+Feel free to refer to this demo for code logic to build our network simulation :-)
+
+Things to note:
+1. This demo includes hardcoding of ARP table
+    - Assumes complete understanding of IP-MAC mapping
+    - No implementation of MAC/Ethernet broadcast since all mappings known
+
+2. Project requirements
+    - Broadcast frame to all devices within network, based on MAC address (Unicast API)
+    - For every MAC, check for dest IP match, otherwise drop frame
+
+Source: https://medium.com/swlh/creating-a-simple-router-simulation-using-python-and-sockets-d6017b441c09

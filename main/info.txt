@@ -1,0 +1,12 @@
+Port numbers
+----------------
+Network 1
+- Router - 1200 (Node1 connects to this)
+
+Network 2
+- Router - 2200 (Node2 and Node3 connect to this)
+
+WIP (as of 08/02)
+-----------------
+- Connect Node2 and Node3 to each other -> new intra-network port for Network 2?
+- Keeping connection open to send packets -> while loop
