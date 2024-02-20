@@ -25,7 +25,7 @@ while (node1 == None):
         print("Node 1 online") 
 
 # from network 2
-router2.listen(3)
+router2.listen(4)
 node2 = None
 node3 = None
 
@@ -40,5 +40,12 @@ while (node2 == None or node3 == None):
         node3 = node
         print("Node 3 online")
 
-# (WIP) keeping connection open
+# (WIP) keeping connection open:
+#   code to refer -> router demo for packet receival and sending
+#   MAC broadcast (network 1) -> unicast (one-to-one), packet sent to each node in each network
+#                             -> only one other node in network aka node1
+#   MAC broadcast (network 2) -> unicast (one-to-one), packet sent to each node in each network
+#                             -> multiple packets with diff dest MACs (node2_mac, node3_mac)
+#                             -> drop incoming packet if dest IP != node1_ip OR router2_ip
+
 # while True:
