@@ -7,9 +7,21 @@ Network 2
 - Router - 2200 (Node2 and Node3 connect to this)
 - Node2 (intra) - 2000 (Node3 (intra) connects to this)
 
-WIP 
+Protocols
 -----------------
-Basic network setup (by end of Week 9)
-- One person per .py file (nodes 1-3, router)
-- Keep connection open to send packets -> setup outgoing packets and receival procedures
-- Integrate unicast for ethernet broadcast 
+0P - ping request
+0R - ping reply 
+1K - kill
+
+How to run
+-----------------
+- Terminal command: python <.py file> (cd into 'main' directory first)
+- Run router first, then run each node
+
+Demo
+-----------------
+1. Run router, node1, node2, node3 in order
+2. Packet forwarding
+   - node1 -> router -> node2 (0P)
+   - node2 -> router -> node1 (0R)
+   - node2 -> node3 (1K)
