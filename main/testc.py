@@ -65,28 +65,25 @@ def receive():
     # receiving
     message = node3.recv(1024).decode()
 
+    source_mac = message[0:2]
     destination_mac = message[2:4]
-    if destination_mac != "N3":
-        return
-    else:
-        source_mac = message[0:2]
-        source_ip = message[4:8]
-        destination_ip = message[8:12]
-        protocol = message[12:13]
-        data_length = message[13:14]
-        data = message[14:]
+    source_ip = message[4:8]
+    destination_ip = message[8:12]
+    protocol = message[12:13]
+    data_length = message[13:14]
+    data = message[14:]
 
-        print("\n-Message Received-\n")
-        print(data)
+    print("\n-Message Received-\n")
+    print(data)
 
-        if protocol ==  "0":
-            new_source_mac = destination_mac
-            new_destination_mac = source_mac
-            new_source_ip = destination_ip
-            new_destination_ip = source_ip
-            new_protocol  = "1"
-            packet = new_source_mac + new_destination_mac + new_source_ip + new_destination_ip + new_protocol + data_length + data
-            node3.send(bytes(packet, "utf-8"))
+    if protocol ==  "0":
+        new_source_mac = destination_mac
+        new_destination_mac = source_mac
+        new_source_ip = destination_ip
+        new_destination_ip = source_ip
+        new_protocol  = "1"
+        packet = new_source_mac + new_destination_mac + new_source_ip + new_destination_ip + new_protocol + data_length + data
+        node3.send(bytes(packet, "utf-8"))
 
 thread1 = threading.Thread(target = send)
 thread2 = threading.Thread(target = receive)
