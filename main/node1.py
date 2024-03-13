@@ -26,25 +26,26 @@ while True:
     data = input("Enter data: ")
     data_length = len(data)
 
-    if data_length >= 10:
-        print("Data too large")
-    else:
+    while data_length >= 10:
+        print("[ERROR] Data too large")
+        data = input("Enter data: ")
+        data_length = len(data)
+    
+    protocol = input("Enter protocol: ")
+    while protocol != "0P" and protocol != "1K":
+        print("[ERROR] Wrong protocol inputed")
         protocol = input("Enter protocol: ")
-        if protocol != "0P" and protocol != "1K":
-            print("Wrong protocol inputed")
-        else:
-            destination_ip = input("Enter destination IP: ")
-            if(destination_ip == node2_ip or destination_ip == node3_ip): 
-                source_ip = node1_ip
-                source_mac = node1_mac
-                destination_mac = router_mac
 
-                IP_header = IP_header + source_ip + destination_ip + protocol
-                ethernet_header = ethernet_header + source_mac + destination_mac
-                packet = ethernet_header + IP_header + str(data_length) + data
-                node1.send(bytes(packet, "utf-8"))  
-            else:
-                print("Wrong destination IP inputed")
+    destination_ip = input("Enter destination IP: ")
+    while destination_ip != node2_ip and destination_ip != node2_ip:
+        print("[ERROR] Wrong destination IP inputed")
+        destination_ip = input("Enter destination IP: ")
+
+    # send to router
+    IP_header = IP_header + node1_ip + destination_ip + protocol
+    ethernet_header = ethernet_header + node1_mac + router_mac
+    packet = ethernet_header + IP_header + str(data_length) + data
+    node1.send(bytes(packet, "utf-8"))
 
     # receive data from router
     received_message = node1.recv(1024)

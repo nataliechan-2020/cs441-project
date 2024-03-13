@@ -91,25 +91,24 @@ while True:
     data_length = received_message[14:15]
     data = received_message[15:]
     
-    print("\nINCOMING PACKET - NODE 2:")
-    print("Source MAC address: {source_mac} \nDestination MAC address: {destination_mac}".format(source_mac=source_mac, destination_mac=destination_mac))
-    print("Source IP address: {source_ip} \nDestination IP address: {destination_ip}".format(source_ip=source_ip, destination_ip=destination_ip))
-    print("Protocol: " + protocol)
-    print("Data length: " + data_length)
-    print("Data: " + data)
-
     # drop packet
     if destination_mac != router2_mac:
-        print("Packet dropped:")
-        print("Destination MAC address: {destination_mac}".format(destination_mac=destination_mac))
+        print("\nPACKET DROPPED")
+    else:
+        print("\nINCOMING PACKET - NODE 2:")
+        print("Source MAC address: {source_mac} \nDestination MAC address: {destination_mac}".format(source_mac=source_mac, destination_mac=destination_mac))
+        print("Source IP address: {source_ip} \nDestination IP address: {destination_ip}".format(source_ip=source_ip, destination_ip=destination_ip))
+        print("Protocol: " + protocol)
+        print("Data length: " + data_length)
+        print("Data: " + data)
     
-    # forward packet to node1
-    elif destination_ip == node1_ip: 
-        ethernet_header = router1_mac + node1_mac
-        IP_header = source_ip + destination_ip + protocol
-        packet = ethernet_header + IP_header + data_length + data
-        destination_socket = arp_socket[node1_mac]
-        destination_socket.send(bytes(packet, "utf-8"))
+        # forward packet to node1
+        if destination_ip == node1_ip: 
+            ethernet_header = router1_mac + node1_mac
+            IP_header = source_ip + destination_ip + protocol
+            packet = ethernet_header + IP_header + data_length + data
+            destination_socket = arp_socket[node1_mac]
+            destination_socket.send(bytes(packet, "utf-8"))
     
     # receive from node3
     received_message = node3.recv(1024)
@@ -122,23 +121,22 @@ while True:
     protocol = received_message[12:14]
     data_length = received_message[14:15]
     data = received_message[15:]
-    
-    print("\nINCOMING PACKET - NODE 3:")
-    print("Source MAC address: {source_mac} \nDestination MAC address: {destination_mac}".format(source_mac=source_mac, destination_mac=destination_mac))
-    print("Source IP address: {source_ip} \nDestination IP address: {destination_ip}".format(source_ip=source_ip, destination_ip=destination_ip))
-    print("Protocol: " + protocol)
-    print("Data length: " + data_length)
-    print("Data: " + data)
 
     # drop packet if dest IP != node1_ip
     if destination_ip != node1_ip: 
-        print("Packet dropped:")
-        print("\nDestination IP address: {destination_ip}".format(destination_ip=destination_ip))
-    
-    # forward packet to node1
-    elif destination_ip == node1_ip: 
-        ethernet_header = router1_mac + node1_mac
-        IP_header = source_ip + destination_ip + protocol
-        packet = ethernet_header + IP_header + data_length + data
-        destination_socket = arp_socket[node1_mac]
-        destination_socket.send(bytes(packet, "utf-8"))
+        print("\nPACKET DROPPED")
+    else:
+        print("\nINCOMING PACKET - NODE 3:")
+        print("Source MAC address: {source_mac} \nDestination MAC address: {destination_mac}".format(source_mac=source_mac, destination_mac=destination_mac))
+        print("Source IP address: {source_ip} \nDestination IP address: {destination_ip}".format(source_ip=source_ip, destination_ip=destination_ip))
+        print("Protocol: " + protocol)
+        print("Data length: " + data_length)
+        print("Data: " + data)
+            
+        # forward packet to node1
+        if destination_ip == node1_ip: 
+            ethernet_header = router1_mac + node1_mac
+            IP_header = source_ip + destination_ip + protocol
+            packet = ethernet_header + IP_header + data_length + data
+            destination_socket = arp_socket[node1_mac]
+            destination_socket.send(bytes(packet, "utf-8"))

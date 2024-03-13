@@ -18,7 +18,7 @@ node3 = None
 while (node3 == None):
     if (node3 == None):
         node3, address = intra2.accept()
-        print("Node 3 online") 
+        # print("Node 3 online") 
 
 # connect to router
 time.sleep(1)
@@ -51,48 +51,51 @@ while True:
     data_length = received_message[14:15]
     data = received_message[15:]
 
-    print("\nINCOMING PACKET:")
-    print("Source MAC address: {source_mac} \nDestination MAC address: {destination_mac}".format(source_mac=source_mac, destination_mac=destination_mac))
-    print("Source IP address: {source_ip} \nDestination IP address: {destination_ip}".format(source_ip=source_ip, destination_ip=destination_ip))
-    print("Protocol: " + protocol)
-    print("Data length: " + data_length)
-    print("Data: " + data)
-
     # drop packet
     if destination_mac != node2_mac:
-        print("Packet dropped:")
-        print("Destination MAC address: {destination_mac}".format(destination_mac=destination_mac))
+        print("\nPACKET DROPPED")
+    else:
+        print("\nINCOMING PACKET:")
+        print("Source MAC address: {source_mac} \nDestination MAC address: {destination_mac}".format(source_mac=source_mac, destination_mac=destination_mac))
+        print("Source IP address: {source_ip} \nDestination IP address: {destination_ip}".format(source_ip=source_ip, destination_ip=destination_ip))
+        print("Protocol: " + protocol)
+        print("Data length: " + data_length)
+        print("Data: " + data)
 
-    # ping reply, unicast -> reply to router and node3
-    elif protocol == "0P":
-        protocol = "0R"
-        ethernet_header = node2_mac + arp_mac[source_ip]
-        IP_header = node2_ip + source_ip + protocol
-        packet = ethernet_header + IP_header + data_length + data
-        node2.send(bytes(packet, "utf-8"))
-        node3.send(bytes(packet, "utf-8")) 
+        # ping reply, unicast -> reply to router and node3
+        if protocol == "0P":
+            protocol = "0R"
+            ethernet_header = node2_mac + arp_mac[source_ip]
+            IP_header = node2_ip + source_ip + protocol
+            packet = ethernet_header + IP_header + data_length + data
+            node2.send(bytes(packet, "utf-8"))
+            node3.send(bytes(packet, "utf-8")) 
 
-    # send new packet
+    # # send new packet
     print("\nOUTGOING PACKET:")
     ethernet_header = ""
     IP_header = ""
     data = input("Enter data: ")
     data_length = len(data)
 
-    if data_length >= 10:
-        print("Data too large")
-    else:
+    while data_length >= 10:
+        print("[ERROR] Data too large")
+        data = input("Enter data: ")
+        data_length = len(data)
+
+    protocol = input("Enter protocol: ")
+    while protocol != "0P" and protocol != "1K":
+        print("[ERROR] Wrong protocol inputed")
         protocol = input("Enter protocol: ")
-        if protocol != "0P" and protocol != "1K":
-            print("Wrong protocol inputed")
-        else:
-            destination_ip = input("Enter destination IP: ")
-            if(destination_ip == node1_ip or destination_ip == node3_ip): 
-                # unicast -> to router and node3
-                IP_header = IP_header + node2_ip + destination_ip + protocol
-                ethernet_header = ethernet_header + node2_mac + arp_mac[destination_ip]
-                packet = ethernet_header + IP_header + str(data_length) + data
-                node2.send(bytes(packet, "utf-8"))
-                node3.send(bytes(packet, "utf-8"))
-            else:
-                print("Wrong destination IP inputed")
+
+    destination_ip = input("Enter destination IP: ")
+    while destination_ip != node1_ip and destination_ip != node3_ip:
+        print("[ERROR] Wrong destination IP inputed")
+        destination_ip = input("Enter destination IP: ")
+
+    # unicast -> to router and node2
+    IP_header = IP_header + node3_ip + destination_ip + protocol
+    ethernet_header = ethernet_header + node2_mac + arp_mac[destination_ip]
+    packet = ethernet_header + IP_header + str(data_length) + data
+    node2.send(bytes(packet, "utf-8"))
+    node3.send(bytes(packet, "utf-8"))
