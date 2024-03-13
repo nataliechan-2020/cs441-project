@@ -46,6 +46,7 @@ node2_ip = "0x2A"
 node3_ip = "0x2B"
 
 arp_socket = {node1_mac : node1, node2_mac : node2, node3_mac : node3}
+arp_mac = {node1_ip : node1_mac, node2_ip : node2_mac, node3_ip : node3_mac}
 
 while True:
     # receive from node1 
@@ -69,14 +70,12 @@ while True:
 
     # unicast -> forward packet to node2
     IP_header = source_ip + destination_ip + protocol
-    ethernet_header = router2_mac + node2_mac
+    ethernet_header = router2_mac + arp_mac[destination_ip]
     packet = ethernet_header + IP_header + data_length + data
     destination_socket = arp_socket[node2_mac]
     destination_socket.send(bytes(packet, "utf-8"))
 
     # unicast -> forward packet to node3
-    ethernet_header = router2_mac + node3_mac
-    packet = ethernet_header + IP_header + data_length + data
     destination_socket = arp_socket[node3_mac]
     destination_socket.send(bytes(packet, "utf-8"))
 
@@ -99,10 +98,10 @@ while True:
     print("Data length: " + data_length)
     print("Data: " + data)
 
-    # drop packet if dest IP != node1_ip
-    if destination_ip != node1_ip:
+    # drop packet
+    if destination_mac != router2_mac:
         print("Packet dropped:")
-        print("\nDestination IP address: {destination_ip}".format(destination_ip=destination_ip))
+        print("Destination MAC address: {destination_mac}".format(destination_mac=destination_mac))
     
     # forward packet to node1
     elif destination_ip == node1_ip: 

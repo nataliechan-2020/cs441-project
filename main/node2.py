@@ -31,6 +31,8 @@ node3_mac = "N3"
 node1_ip = "0x1A"
 node3_ip = "0x2B"
 
+arp_mac = {node1_ip : router_mac, node3_ip : node3_mac}
+
 # Start a thread for receiving messages from Node 3
 # receive_thread = threading.Thread(target=receive_from_node3)
 # receive_thread.daemon = True
@@ -56,20 +58,18 @@ while True:
     print("Data length: " + data_length)
     print("Data: " + data)
 
-    # ping reply
-    if protocol == "0P":
+    # drop packet
+    if destination_mac != node2_mac:
+        print("Packet dropped:")
+        print("Destination MAC address: {destination_mac}".format(destination_mac=destination_mac))
+
+    # ping reply, unicast -> reply to router and node3
+    elif protocol == "0P":
         protocol = "0R"
-
-        # unicast -> reply to router
-        ethernet_header = node2_mac + router_mac
+        ethernet_header = node2_mac + arp_mac[source_ip]
         IP_header = node2_ip + source_ip + protocol
         packet = ethernet_header + IP_header + data_length + data
-        node2.send(bytes(packet, "utf-8"))  
-
-        # unicast -> reply to node3
-        ethernet_header = node2_mac + node3_mac
-        IP_header = node2_ip + source_ip + protocol
-        packet = ethernet_header + IP_header + data_length + data
+        node2.send(bytes(packet, "utf-8"))
         node3.send(bytes(packet, "utf-8")) 
 
     # send new packet
@@ -87,21 +87,12 @@ while True:
             print("Wrong protocol inputed")
         else:
             destination_ip = input("Enter destination IP: ")
-            if(destination_ip == router1_ip or destination_ip == router2_ip or destination_ip == node1_ip or destination_ip == node3_ip): 
-                # unicast -> to router
-                source_ip = node2_ip
-                source_mac = node2_mac
-                destination_mac = router_mac
-                IP_header = IP_header + source_ip + destination_ip + protocol
-                ethernet_header = ethernet_header + source_mac + destination_mac
+            if(destination_ip == node1_ip or destination_ip == node3_ip): 
+                # unicast -> to router and node3
+                IP_header = IP_header + node2_ip + destination_ip + protocol
+                ethernet_header = ethernet_header + node2_mac + arp_mac[destination_ip]
                 packet = ethernet_header + IP_header + str(data_length) + data
-                node2.send(bytes(packet, "utf-8"))  
-
-                # unicast -> to node3
-                destination_mac = node3_mac
-                IP_header = IP_header + source_ip + destination_ip + protocol
-                ethernet_header = ethernet_header + source_mac + destination_mac
-                packet = ethernet_header + IP_header + str(data_length) + data
+                node2.send(bytes(packet, "utf-8"))
                 node3.send(bytes(packet, "utf-8"))
             else:
                 print("Wrong destination IP inputed")
