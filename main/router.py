@@ -21,7 +21,6 @@ node1 = None
 while (node1 == None):
     if (node1 == None):
         node1, address = router1.accept()
-        print("Node 1 online") 
 
 # from network 2
 router2.listen(4)
@@ -30,12 +29,12 @@ node3 = None
 
 while (node2 == None or node3 == None):
     node, address = router2.accept()
-    if (node2 == None):
-        node2 = node
-        print("Node 2 online")
-    elif (node3 == None):
+    if (node3 == None):
         node3 = node
-        print("Node 3 online")
+    elif (node2 == None):
+        node2 = node
+ 
+print("CONNECTED")
 
 # arp table
 node1_mac = "N1"
@@ -79,7 +78,7 @@ while True:
     destination_socket = arp_socket[node3_mac]
     destination_socket.send(bytes(packet, "utf-8"))
 
-    # receive from node2 
+    # receive from node2
     received_message = node2.recv(1024)
     received_message =  received_message.decode("utf-8")
     
@@ -109,7 +108,7 @@ while True:
             packet = ethernet_header + IP_header + data_length + data
             destination_socket = arp_socket[node1_mac]
             destination_socket.send(bytes(packet, "utf-8"))
-    
+
     # receive from node3
     received_message = node3.recv(1024)
     received_message =  received_message.decode("utf-8")
@@ -139,4 +138,4 @@ while True:
             IP_header = source_ip + destination_ip + protocol
             packet = ethernet_header + IP_header + data_length + data
             destination_socket = arp_socket[node1_mac]
-            destination_socket.send(bytes(packet, "utf-8"))
+            destination_socket.send(bytes(packet, "utf-8")) 
