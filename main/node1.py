@@ -37,7 +37,7 @@ while True:
         protocol = input("Enter protocol: ")
 
     destination_ip = input("Enter destination IP: ")
-    while destination_ip != node2_ip and destination_ip != node2_ip:
+    while destination_ip != node2_ip and destination_ip != node3_ip:
         print("[ERROR] Wrong destination IP inputed")
         destination_ip = input("Enter destination IP: ")
 
