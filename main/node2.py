@@ -61,39 +61,43 @@ def send_outgoing_packet():
     node3.send(bytes(packet, "utf-8"))
 
 
-send_outgoing_packet()
-while True:
-    # receive from router
-    received_message = node2.recv(1024)
-    received_message = received_message.decode("utf-8")
 
-    source_mac = received_message[0:2]
-    destination_mac = received_message[2:4]
-    source_ip = received_message[4:8]
-    destination_ip =  received_message[8:12]
-    protocol = received_message[12:14]
-    data_length = received_message[14:15]
-    data = received_message[15:]
+def receive_incoming_packet():
+    while True:
+        # receive from router
+        received_message = node2.recv(1024)
+        received_message = received_message.decode("utf-8")
 
-    # drop packet
-    if destination_mac != node2_mac:
-        print("\nPACKET DROPPED")
-    else:
-        print("\nINCOMING PACKET:")
-        print("Source MAC address: {source_mac} \nDestination MAC address: {destination_mac}".format(source_mac=source_mac, destination_mac=destination_mac))
-        print("Source IP address: {source_ip} \nDestination IP address: {destination_ip}".format(source_ip=source_ip, destination_ip=destination_ip))
-        print("Protocol: " + protocol)
-        print("Data length: " + data_length)
-        print("Data: " + data)
+        print("Received message from router:", received_message)
 
-        # ping reply, unicast -> reply to router and node3
-        if protocol == "0P":
-            protocol = "0R"
-            ethernet_header = node2_mac + arp_mac[source_ip]
-            IP_header = node2_ip + source_ip + protocol
-            packet = ethernet_header + IP_header + data_length + data
-            node2.send(bytes(packet, "utf-8"))
-            node3.send(bytes(packet, "utf-8"))
+        source_mac = received_message[0:2]
+        destination_mac = received_message[2:4]
+        source_ip = received_message[4:8]
+        destination_ip =  received_message[8:12]
+        protocol = received_message[12:14]
+        data_length = received_message[14:15]
+        data = received_message[15:]
 
-    # send new packet
-    send_outgoing_packet()
+        # drop packet
+        if destination_mac != node2_mac:
+            print("\nPACKET DROPPED")
+        else:
+            print("\nINCOMING PACKET:")
+            print("Source MAC address: {source_mac} \nDestination MAC address: {destination_mac}".format(source_mac=source_mac, destination_mac=destination_mac))
+            print("Source IP address: {source_ip} \nDestination IP address: {destination_ip}".format(source_ip=source_ip, destination_ip=destination_ip))
+            print("Protocol: " + protocol)
+            print("Data length: " + data_length)
+            print("Data: " + data)
+
+            # ping reply, unicast -> reply to router and node3
+            if protocol == "0P":
+                protocol = "0R"
+                ethernet_header = node2_mac + arp_mac[source_ip]
+                IP_header = node2_ip + source_ip + protocol
+                packet = ethernet_header + IP_header + data_length + data
+                node2.send(bytes(packet, "utf-8"))
+                node3.send(bytes(packet, "utf-8"))
+
+            # send new packet
+            send_outgoing_packet()
+receive_incoming_packet()

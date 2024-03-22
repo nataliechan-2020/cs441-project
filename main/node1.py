@@ -18,62 +18,74 @@ router_mac = "R1"
 node2_ip = "0x2A"
 node3_ip = "0x2B"
 
-# Flag to control outgoing packet sending
-allow_outgoing_packet = True
+def send_outgoing_packet():
+    print("\nOUTGOING PACKET:")
+    ethernet_header = ""
+    IP_header = ""
+    data = input("Enter data: ")
+    data_length = len(data)
 
-while True:
-    if allow_outgoing_packet:
-        # Send new packet to router
-        print("\nOUTGOING PACKET:")
-        ethernet_header = ""
-        IP_header = ""
+    while data_length >= 10:
+        print("[ERROR] Data too large")
         data = input("Enter data: ")
         data_length = len(data)
 
-        while data_length >= 10:
-            print("[ERROR] Data too large")
-            data = input("Enter data: ")
-            data_length = len(data)
-
+    protocol = input("Enter protocol: ")
+    while protocol != "0P" and protocol != "1K":
+        print("[ERROR] Wrong protocol inputed")
         protocol = input("Enter protocol: ")
-        while protocol not in ["0P", "1K"]:
-            print("[ERROR] Wrong protocol entered")
-            protocol = input("Enter protocol: ")
 
+    destination_ip = input("Enter destination IP: ")
+    while destination_ip != node2_ip and destination_ip != node3_ip:
+        print("[ERROR] Wrong destination IP inputed")
         destination_ip = input("Enter destination IP: ")
-        while destination_ip != node2_ip and destination_ip != node3_ip:
-            print("[ERROR] Wrong destination IP entered")
-            destination_ip = input("Enter destination IP: ")
 
-        # Send to router
-        IP_header = IP_header + node1_ip + destination_ip + protocol
-        ethernet_header = ethernet_header + node1_mac + router_mac
-        packet = ethernet_header + IP_header + str(data_length) + data
-        node1.send(bytes(packet, "utf-8"))
+    # Send to router
+    IP_header = IP_header + node1_ip + destination_ip + protocol
+    ethernet_header = ethernet_header + node1_mac + router_mac
+    packet = ethernet_header + IP_header + str(data_length) + data
+    node1.send(bytes(packet, "utf-8"))
 
-        # Set flag to disallow sending outgoing packet until a response is received
-        allow_outgoing_packet = False
-
+def receive_incoming_packet(node1_mac):
+    while True:
         # Receive data from router
         received_message = node1.recv(1024)
         received_message = received_message.decode("utf-8")
-
         source_mac = received_message[0:2]
         destination_mac = received_message[2:4]
         source_ip = received_message[4:8]
-        destination_ip = received_message[8:12]
+        destination_ip =  received_message[8:12]
         protocol = received_message[12:14]
         data_length = received_message[14:15]
         data = received_message[15:]
 
-        print("\nINCOMING PACKET:")
-        print("Source MAC address:", source_mac)
-        print("Destination MAC address:", destination_mac)
-        print("Source IP address:", source_ip)
-        print("Destination IP address:", destination_ip)
-        print("Protocol:", protocol)
-        print("Data length:", data_length)
-        print("Data:", data)
+        print("Received message from router:", received_message)
+        
+        if destination_mac != node1_mac:
+            print("\nPACKET DROPPED")
+   
+        else:
+            print("\nINCOMING PACKET:")
+            print("Source MAC address: {source_mac} \nDestination MAC address: {destination_mac}".format(source_mac=source_mac, destination_mac=destination_mac))
+            print("Source IP address: {source_ip} \nDestination IP address: {destination_ip}".format(source_ip=source_ip, destination_ip=destination_ip))
+            print("Protocol: " + protocol)
+            print("Data length: " + data_length)
+            print("Data: " + data)
 
-        # Set flag to allow sending outgoing packet after receiving incoming packet
-        allow_outgoing_packet = True
+            # ping reply, unicast -> reply to router and node3
+            if protocol == "0P":
+                protocol = "0R"
+                ethernet_header = node1_mac + router_mac
+                IP_header = node2_ip + source_ip + protocol
+                packet = ethernet_header + IP_header + data_length + data
+                node1.send(bytes(packet, "utf-8"))
+                node1.send(bytes(packet, "utf-8"))
+
+            # You can add processing logic here if needed
+            send_outgoing_packet()  # After receiving, allow sending another packet
+
+send_outgoing_packet()  # Initial sending
+receive_incoming_packet(node1_mac)
+
+# Close the connection
+node1.close()
