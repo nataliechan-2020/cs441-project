@@ -1,8 +1,7 @@
 import socket
 import time
-# import threading
 
-# initialise IP and MAC addresses
+# Initialise IP and MAC addresses
 node2_ip = "0x2A"
 node2_mac = "N2"
 
@@ -18,7 +17,6 @@ node3 = None
 while (node3 == None):
     if (node3 == None):
         node3, address = intra2.accept()
-        # print("Node 3 online") 
 
 # connect to router
 time.sleep(1)
@@ -33,11 +31,37 @@ node3_ip = "0x2B"
 
 arp_mac = {node1_ip : router_mac, node3_ip : node3_mac}
 
-# Start a thread for receiving messages from Node 3
-# receive_thread = threading.Thread(target=receive_from_node3)
-# receive_thread.daemon = True
-# receive_thread.start()
+def send_outgoing_packet():
+    print("\nOUTGOING PACKET:")
+    ethernet_header = ""
+    IP_header = ""
+    data = input("Enter data: ")
+    data_length = len(data)
 
+    while data_length >= 10:
+        print("[ERROR] Data too large")
+        data = input("Enter data: ")
+        data_length = len(data)
+
+    protocol = input("Enter protocol: ")
+    while protocol != "0P" and protocol != "1K":
+        print("[ERROR] Wrong protocol inputed")
+        protocol = input("Enter protocol: ")
+
+    destination_ip = input("Enter destination IP: ")
+    while destination_ip != node1_ip and destination_ip != node3_ip:
+        print("[ERROR] Wrong destination IP inputed")
+        destination_ip = input("Enter destination IP: ")
+
+    # unicast -> to router and node2
+    IP_header = IP_header + node3_ip + destination_ip + protocol
+    ethernet_header = ethernet_header + node2_mac + arp_mac[destination_ip]
+    packet = ethernet_header + IP_header + str(data_length) + data
+    node2.send(bytes(packet, "utf-8"))
+    node3.send(bytes(packet, "utf-8"))
+
+
+send_outgoing_packet()
 while True:
     # receive from router
     received_message = node2.recv(1024)
@@ -69,33 +93,7 @@ while True:
             IP_header = node2_ip + source_ip + protocol
             packet = ethernet_header + IP_header + data_length + data
             node2.send(bytes(packet, "utf-8"))
-            node3.send(bytes(packet, "utf-8")) 
+            node3.send(bytes(packet, "utf-8"))
 
-    # # send new packet
-    print("\nOUTGOING PACKET:")
-    ethernet_header = ""
-    IP_header = ""
-    data = input("Enter data: ")
-    data_length = len(data)
-
-    while data_length >= 10:
-        print("[ERROR] Data too large")
-        data = input("Enter data: ")
-        data_length = len(data)
-
-    protocol = input("Enter protocol: ")
-    while protocol != "0P" and protocol != "1K":
-        print("[ERROR] Wrong protocol inputed")
-        protocol = input("Enter protocol: ")
-
-    destination_ip = input("Enter destination IP: ")
-    while destination_ip != node1_ip and destination_ip != node3_ip:
-        print("[ERROR] Wrong destination IP inputed")
-        destination_ip = input("Enter destination IP: ")
-
-    # unicast -> to router and node2
-    IP_header = IP_header + node3_ip + destination_ip + protocol
-    ethernet_header = ethernet_header + node2_mac + arp_mac[destination_ip]
-    packet = ethernet_header + IP_header + str(data_length) + data
-    node2.send(bytes(packet, "utf-8"))
-    node3.send(bytes(packet, "utf-8"))
+    # send new packet
+    send_outgoing_packet()
