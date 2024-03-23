@@ -54,7 +54,7 @@ def send_outgoing_packet():
         destination_ip = input("Enter destination IP: ")
 
     # unicast -> to router and node2
-    IP_header = IP_header + node3_ip + destination_ip + protocol
+    IP_header = IP_header + node2_ip + destination_ip + protocol
     ethernet_header = ethernet_header + node2_mac + arp_mac[destination_ip]
     packet = ethernet_header + IP_header + str(data_length) + data
     node2.send(bytes(packet, "utf-8"))

@@ -99,21 +99,35 @@ def send_outgoing_packet():
     intra3.send(bytes(packet, "utf-8"))
 
 
-def receive_incoming_packet():   
+def receive_incoming_packet():      
+
     while True:
-        # receive from router
-        received_message = node3.recv(1024)
-        received_message = received_message.decode("utf-8")
-        
-        source_mac = received_message[0:2]
-        destination_mac = received_message[2:4]
-        source_ip = received_message[4:8]
-        destination_ip =  received_message[8:12]
-        protocol = received_message[12:14]
-        data_length = received_message[14:15]
-        data = received_message[15:]
+        node3.settimeout(1)
+        try:
+            # receive from router
+            received_message = node3.recv(1024)
+            received_message = received_message.decode("utf-8")
+            
+            source_mac = received_message[0:2]
+            destination_mac = received_message[2:4]
+            source_ip = received_message[4:8]
+            destination_ip =  received_message[8:12]
+            protocol = received_message[12:14]
+            data_length = received_message[14:15]
+            data = received_message[15:]
+        except TimeoutError:
+            received_message = intra3.recv(1024)
+            received_message = received_message.decode("utf-8")
 
+            source_mac = received_message[0:2]
+            destination_mac = received_message[2:4]
+            source_ip = received_message[4:8]
+            destination_ip =  received_message[8:12]
+            protocol = received_message[12:14]
+            data_length = received_message[14:15]
+            data = received_message[15:]
 
+        print(source_ip)
         if source_ip in blocked_ips and source_ip!=node3_ip:
             print("FIREWALL BLOCKED")
             continue
@@ -140,16 +154,16 @@ def receive_incoming_packet():
                 intra3.send(bytes(packet, "utf-8")) 
     
         # receive from node2
-        received_message = intra3.recv(1024)
-        received_message = received_message.decode("utf-8")
+        # received_message = intra3.recv(1024)
+        # received_message = received_message.decode("utf-8")
 
-        source_mac = received_message[0:2]
-        destination_mac = received_message[2:4]
-        source_ip = received_message[4:8]
-        destination_ip =  received_message[8:12]
-        protocol = received_message[12:14]
-        data_length = received_message[14:15]
-        data = received_message[15:]
+        # source_mac = received_message[0:2]
+        # destination_mac = received_message[2:4]
+        # source_ip = received_message[4:8]
+        # destination_ip =  received_message[8:12]
+        # protocol = received_message[12:14]
+        # data_length = received_message[14:15]
+        # data = received_message[15:]
 
         # drop packet
         # if destination_mac != node3_mac and source_ip==node3_ip:
