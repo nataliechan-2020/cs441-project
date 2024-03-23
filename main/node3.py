@@ -1,5 +1,4 @@
 import socket
-import threading
 import time
 
 # initialise IP and MAC addresses
@@ -52,7 +51,10 @@ def main ():
                    "\n2) Remove Blocked IP from Firewall" +
                     "\n3) Send/Receive Packet: \n")
     while int(option) not in [1,2,3]:
-        option = input("Choose 1, 2 or 3: \n1) Add Blocked IP to Firewall \n2) Remove Blocked IP from Firewall \n3) Send/Receive Packet: \n")
+        option = input("Choose 1, 2 or 3:" + 
+                       "\n1) Add Blocked IP to Firewall" + 
+                       "\n2) Remove Blocked IP from Firewall" +
+                       "\n3) Send/Receive Packet: \n")
     option = int(option)
 
     if option == 1:
@@ -72,7 +74,6 @@ def main ():
 
 
 def send_packet():
-    # send new packet
     print("\nOUTGOING PACKET:")
     ethernet_header = ""
     IP_header = ""
@@ -188,3 +189,4 @@ def receive_packet():
         send_packet() 
 
 main()
+node3.close()

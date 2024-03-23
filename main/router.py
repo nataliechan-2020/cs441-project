@@ -6,12 +6,12 @@ router1_mac = "R1"
 router2_ip = "0x21"
 router2_mac = "R2"
 
-def receive_from_node1(node1, arp_socket, arp_mac, router2_mac):
+def from_node1(node1, arp_socket, arp_mac, router2_mac):
     while True:
         try:
             # Receive from node1
             received_message = node1.recv(1024).decode("utf-8")
-            print("NODE 1 TEST")
+            print("-- NODE 1 ---")
             print(received_message)
             
             sorc_mac = received_message[0:2]
@@ -43,12 +43,12 @@ def receive_from_node1(node1, arp_socket, arp_mac, router2_mac):
         except socket.error as e:
             print("Socket error:", e)
 
-def receive_from_node2(node2, arp_socket, arp_mac, router1_mac):
+def from_node2(node2, arp_socket, arp_mac, router1_mac):
     while True:
         try:
             # Receive from node2
             received_message = node2.recv(1024).decode("utf-8")
-            print("NODE 2 TEST")
+            print("-- NODE 2 --")
             print(received_message)
             
             sorc_mac = received_message[0:2]
@@ -78,12 +78,12 @@ def receive_from_node2(node2, arp_socket, arp_mac, router1_mac):
         except socket.error as e:
             print("Socket error:", e)
 
-def receive_from_node3(node3, arp_socket, node1_ip, router1_mac):
+def from_node3(node3, arp_socket, node1_ip, router1_mac):
     while True:
         try:
             # Receive from node3
             received_message = node3.recv(1024).decode("utf-8")
-            
+            print("-- NODE 3 --")
             sorc_mac = received_message[0:2]
             dest_mac = received_message[2:4]
             sorc_ip = received_message[4:8]
@@ -102,7 +102,6 @@ def receive_from_node3(node3, arp_socket, node1_ip, router1_mac):
                 print("Protocol: " + protocol)
                 print("Data length: " + data_length)
                 print("Data: " + data)
-
             
                 ethernet_header = router1_mac + node1_mac
                 IP_header = sorc_ip + dest_ip + protocol
@@ -127,7 +126,7 @@ node3, _ = router2.accept()
 
 print("CONNECTED")
 
-# ARP table
+# arp table
 node1_mac = "N1"
 node2_mac = "N2"
 node3_mac = "N3"
@@ -138,11 +137,11 @@ node3_ip = "0x2B"
 arp_socket = {node1_mac: node1, node2_mac: node2, node3_mac: node3}
 arp_mac = {node1_ip: node1_mac, node2_ip: node2_mac, node3_ip: node3_mac}
 
-receive_node1_thread = threading.Thread(target=receive_from_node1, args=(node1, arp_socket, arp_mac, router2_mac))
-receive_node1_thread.start()
+node1_thread = threading.Thread(target=from_node1, args=(node1, arp_socket, arp_mac, router2_mac))
+node1_thread.start()
 
-receive_node2_thread = threading.Thread(target=receive_from_node2, args=(node2, arp_socket, arp_mac, router1_mac))
-receive_node2_thread.start()
+node2_thread = threading.Thread(target=from_node2, args=(node2, arp_socket, arp_mac, router1_mac))
+node2_thread.start()
 
-receive_node3_thread = threading.Thread(target=receive_from_node3, args=(node3, arp_socket, node1_ip, router1_mac))
-receive_node3_thread.start()
+node3_thread = threading.Thread(target=from_node3, args=(node3, arp_socket, node1_ip, router1_mac))
+node3_thread.start()

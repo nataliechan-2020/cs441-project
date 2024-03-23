@@ -58,7 +58,6 @@ def send_packet():
             ethernet_header = ethernet_header + node1_mac + router_mac
             packet = ethernet_header + IP_header + str(data_length) + data
             node1.send(bytes(packet, "utf-8"))
-
             
             break
         break
@@ -110,11 +109,9 @@ def receive_packet(received_msg):
                 node1.send(bytes(packet, "utf-8"))
                 node1.send(bytes(packet, "utf-8"))
 
-
             send_packet()  
 
 send_packet()  
 receive_packet("")
-
 
 node1.close()

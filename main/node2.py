@@ -99,3 +99,4 @@ def receive_packet():
             send_packet()
 send_packet()
 receive_packet()
+node2.close()
