@@ -98,7 +98,7 @@ def receive_incoming_packet():
                 node2.send(bytes(packet, "utf-8"))
                 node3.send(bytes(packet, "utf-8"))
 
-            _ = node2.recv(1024)
+           
             # send new packet
             send_outgoing_packet()
 send_outgoing_packet()

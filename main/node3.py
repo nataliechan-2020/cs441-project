@@ -33,15 +33,40 @@ blocked_ips = []
 def add_blocked_ip(ip):
     blocked_ips.append(ip)
     print(f"IP address {ip} added to blocked list")
+    print(blocked_ips)
+    main()
 
 # Function to remove IP from blocked IP address
 def remove_blocked_ip(ip):
     if ip in blocked_ips:
         blocked_ips.remove(ip)
         print(f"IP address {ip} removed from blocked list")
+        print(blocked_ips)
     else:
         print(f"IP address {ip} not found in blocked list")
+        print(blocked_ips)
+    main()
 
+def main ():
+    user_input = input("Choose 1, 2 or 3: \n1) Add Blocked IP to Firewall \n2) Remove Blocked IP from Firewall \n3) Send/Receive Packet: \n")
+    while int(user_input) not in [1,2,3]:
+        user_input = input("Choose 1, 2 or 3: \n1) Add Blocked IP to Firewall \n2) Remove Blocked IP from Firewall \n3) Send/Receive Packet: \n")
+    user_input = int(user_input)
+
+    if user_input == 1:
+        ip = input("Enter IP Address: ")
+        while ip != node1_ip and ip != node2_ip:
+            ip = input("Enter IP Address:")
+        add_blocked_ip(ip)
+        
+    elif user_input == 2:
+        ip = input("Enter IP Address: ")
+        while ip != node1_ip and ip != node2_ip:
+            ip = input("Enter IP Address:")
+        remove_blocked_ip(ip)
+    else:
+        send_outgoing_packet()
+        receive_incoming_packet()   
 
 def send_outgoing_packet():
     # send new packet
@@ -88,10 +113,10 @@ def receive_incoming_packet():
         data_length = received_message[14:15]
         data = received_message[15:]
 
-        print("HELLO")
-        print(source_ip)
-        if source_ip in blocked_ips:
+
+        if source_ip in blocked_ips and source_ip!=node3_ip:
             print("FIREWALL BLOCKED")
+            continue
 
         # drop packet
         if destination_mac != node3_mac and source_ip==node3_ip:
@@ -113,7 +138,7 @@ def receive_incoming_packet():
                 packet = ethernet_header + IP_header + data_length + data
                 node3.send(bytes(packet, "utf-8"))
                 intra3.send(bytes(packet, "utf-8")) 
-
+    
         # receive from node2
         received_message = intra3.recv(1024)
         received_message = received_message.decode("utf-8")
@@ -146,7 +171,6 @@ def receive_incoming_packet():
         #         node3.send(bytes(packet, "utf-8"))
         #         intra3.send(bytes(packet, "utf-8")) 
 
-        send_outgoing_packet()  
+        send_outgoing_packet() 
 
-send_outgoing_packet()
-receive_incoming_packet()
+main()
