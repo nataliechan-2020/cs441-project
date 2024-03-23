@@ -36,8 +36,8 @@ def send_outgoing_packet(node1_mac):
                     receive_incoming_packet(node1_mac, msg)
                     break
         except TimeoutError:
-            print("Timeout: No data received within the specified time")
-            print("HELLO")
+            # print("Timeout: No data received within the specified time")
+            # print("HELLO")
             data = input("Enter data: ")
             data_length = len(data)
             while data_length >= 10:
