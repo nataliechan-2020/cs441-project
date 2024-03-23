@@ -107,7 +107,7 @@ def receive_incoming_packet(node1_mac, received_msg):
             if protocol == "0P":
                 protocol = "0R"
                 ethernet_header = node1_mac + router_mac
-                IP_header = node2_ip + source_ip + protocol
+                IP_header = node1_ip + source_ip + protocol
                 packet = ethernet_header + IP_header + data_length + data
                 node1.send(bytes(packet, "utf-8"))
                 node1.send(bytes(packet, "utf-8"))
