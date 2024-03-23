@@ -27,6 +27,21 @@ node2_ip = "0x2A"
 
 arp_mac = {node1_ip : router_mac, node2_ip : node2_mac}
 
+# Array to store blocked IP addresses
+blocked_ips = []
+
+def add_blocked_ip(ip):
+    blocked_ips.append(ip)
+    print(f"IP address {ip} added to blocked list")
+
+# Function to remove IP from blocked IP address
+def remove_blocked_ip(ip):
+    if ip in blocked_ips:
+        blocked_ips.remove(ip)
+        print(f"IP address {ip} removed from blocked list")
+    else:
+        print(f"IP address {ip} not found in blocked list")
+
 
 def send_outgoing_packet():
     # send new packet
@@ -64,7 +79,7 @@ def receive_incoming_packet():
         # receive from router
         received_message = node3.recv(1024)
         received_message = received_message.decode("utf-8")
-
+        
         source_mac = received_message[0:2]
         destination_mac = received_message[2:4]
         source_ip = received_message[4:8]
@@ -73,10 +88,16 @@ def receive_incoming_packet():
         data_length = received_message[14:15]
         data = received_message[15:]
 
+        print("HELLO")
+        print(source_ip)
+        if source_ip in blocked_ips:
+            print("FIREWALL BLOCKED")
+
         # drop packet
-        if destination_mac != node3_mac:
+        if destination_mac != node3_mac and source_ip==node3_ip:
             print("\nPACKET DROPPED")
         else:
+            print(source_ip)
             print("\nINCOMING PACKET:")
             print("Source MAC address: {source_mac} \nDestination MAC address: {destination_mac}".format(source_mac=source_mac, destination_mac=destination_mac))
             print("Source IP address: {source_ip} \nDestination IP address: {destination_ip}".format(source_ip=source_ip, destination_ip=destination_ip))
@@ -106,24 +127,24 @@ def receive_incoming_packet():
         data = received_message[15:]
 
         # drop packet
-        if destination_mac != node3_mac:
-            print("\nPACKET DROPPED")
-        else:
-            print("\nINCOMING PACKET:")
-            print("Source MAC address: {source_mac} \nDestination MAC address: {destination_mac}".format(source_mac=source_mac, destination_mac=destination_mac))
-            print("Source IP address: {source_ip} \nDestination IP address: {destination_ip}".format(source_ip=source_ip, destination_ip=destination_ip))
-            print("Protocol: " + protocol)
-            print("Data length: " + data_length)
-            print("Data: " + data)
+        # if destination_mac != node3_mac and source_ip==node3_ip:
+        #     print("\nPACKET DROPPED")
+        # else:
+        #     print("\nINCOMING PACKET:")
+        #     print("Source MAC address: {source_mac} \nDestination MAC address: {destination_mac}".format(source_mac=source_mac, destination_mac=destination_mac))
+        #     print("Source IP address: {source_ip} \nDestination IP address: {destination_ip}".format(source_ip=source_ip, destination_ip=destination_ip))
+        #     print("Protocol: " + protocol)
+        #     print("Data length: " + data_length)
+        #     print("Data: " + data)
 
-            # ping reply, unicast -> reply to router and node2
-            if protocol == "0P":
-                protocol = "0R"
-                ethernet_header = node3_mac + arp_mac[source_ip]
-                IP_header = node3_ip + source_ip + protocol
-                packet = ethernet_header + IP_header + data_length + data
-                node3.send(bytes(packet, "utf-8"))
-                intra3.send(bytes(packet, "utf-8")) 
+        #     # ping reply, unicast -> reply to router and node2
+        #     if protocol == "0P":
+        #         protocol = "0R"
+        #         ethernet_header = node3_mac + arp_mac[source_ip]
+        #         IP_header = node3_ip + source_ip + protocol
+        #         packet = ethernet_header + IP_header + data_length + data
+        #         node3.send(bytes(packet, "utf-8"))
+        #         intra3.send(bytes(packet, "utf-8")) 
 
         send_outgoing_packet()  
 
