@@ -1,5 +1,5 @@
 import socket
-
+import threading
 # Initialise IP and MAC addresses
 router1_ip = "0x11"
 router1_mac = "R1"
@@ -14,31 +14,31 @@ def receive_from_node1(node1, arp_socket, arp_mac, router2_mac):
             print("NODE 1 TEST")
             print(received_message)
             
-            source_mac = received_message[0:2]
-            destination_mac = received_message[2:4]
-            source_ip = received_message[4:8]
-            destination_ip = received_message[8:12]
+            sorc_mac = received_message[0:2]
+            dest_mac = received_message[2:4]
+            sorc_ip = received_message[4:8]
+            dest_ip = received_message[8:12]
             protocol = received_message[12:14]
             data_length = received_message[14:15]
             data = received_message[15:]
             
             print("\nINCOMING PACKET - NODE 1:")
-            print("Source MAC address:", source_mac, "\nDestination MAC address:", destination_mac)
-            print("Source IP address:", source_ip, "\nDestination IP address:", destination_ip)
+            print("Source MAC address:", sorc_mac, "\nDestination MAC address:", dest_mac)
+            print("Source IP address:", sorc_ip, "\nDestination IP address:", dest_ip)
             print("Protocol:", protocol)
             print("Data length:", data_length)
             print("Data:", data)
 
             # Forward packet to node2
-            IP_header = source_ip + destination_ip + protocol
-            ethernet_header = router2_mac + arp_mac[destination_ip]
+            IP_header = sorc_ip + dest_ip + protocol
+            ethernet_header = router2_mac + arp_mac[dest_ip]
             packet = ethernet_header + IP_header + data_length + data
-            destination_socket = arp_socket[node2_mac]
-            destination_socket.send(bytes(packet, "utf-8"))
+            dest = arp_socket[node2_mac]
+            dest.send(bytes(packet, "utf-8"))
 
             # Forward packet to node3
-            destination_socket = arp_socket[node3_mac]
-            destination_socket.send(bytes(packet, "utf-8"))
+            dest = arp_socket[node3_mac]
+            dest.send(bytes(packet, "utf-8"))
 
         except socket.error as e:
             print("Socket error:", e)
@@ -51,30 +51,30 @@ def receive_from_node2(node2, arp_socket, arp_mac, router1_mac):
             print("NODE 2 TEST")
             print(received_message)
             
-            source_mac = received_message[0:2]
-            destination_mac = received_message[2:4]
-            source_ip = received_message[4:8]
-            destination_ip = received_message[8:12]
+            sorc_mac = received_message[0:2]
+            dest_mac = received_message[2:4]
+            sorc_ip = received_message[4:8]
+            dest_ip = received_message[8:12]
             protocol = received_message[12:14]
             data_length = received_message[14:15]
             data = received_message[15:]
 
-            if destination_mac != router2_mac:
+            if dest_mac != router2_mac:
                 print("\n PACKET DROPPED")
             else:
                 print("\nINCOMING PACKET - NODE 2:")
-                print("Source MAC address:", source_mac, "\nDestination MAC address:", destination_mac)
-                print("Source IP address:", source_ip, "\nDestination IP address:", destination_ip)
+                print("Source MAC address:", sorc_mac, "\nDestination MAC address:", dest_mac)
+                print("Source IP address:", sorc_ip, "\nDestination IP address:", dest_ip)
                 print("Protocol:", protocol)
                 print("Data length:", data_length)
                 print("Data:", data)
 
                 # Send packet back to node1
-                IP_header = source_ip + destination_ip + protocol
-                ethernet_header = router1_mac + arp_mac[destination_ip]
+                IP_header = sorc_ip + dest_ip + protocol
+                ethernet_header = router1_mac + arp_mac[dest_ip]
                 packet = ethernet_header + IP_header + data_length + data
-                destination_socket = arp_socket[node1_mac]
-                destination_socket.send(bytes(packet, "utf-8"))
+                dest = arp_socket[node1_mac]
+                dest.send(bytes(packet, "utf-8"))
         except socket.error as e:
             print("Socket error:", e)
 
@@ -84,31 +84,31 @@ def receive_from_node3(node3, arp_socket, node1_ip, router1_mac):
             # Receive from node3
             received_message = node3.recv(1024).decode("utf-8")
             
-            source_mac = received_message[0:2]
-            destination_mac = received_message[2:4]
-            source_ip = received_message[4:8]
-            destination_ip = received_message[8:12]
+            sorc_mac = received_message[0:2]
+            dest_mac = received_message[2:4]
+            sorc_ip = received_message[4:8]
+            dest_ip = received_message[8:12]
             protocol = received_message[12:14]
             data_length = received_message[14:15]
             data = received_message[15:]
 
             # drop packet if dest IP != node1_ip
-            if destination_ip != node1_ip: 
+            if dest_ip != node1_ip: 
                 print("\nPACKET DROPPED")
             else:
                 print("\nINCOMING PACKET - NODE 3:")
-                print("Source MAC address: {source_mac} \nDestination MAC address: {destination_mac}".format(source_mac=source_mac, destination_mac=destination_mac))
-                print("Source IP address: {source_ip} \nDestination IP address: {destination_ip}".format(source_ip=source_ip, destination_ip=destination_ip))
+                print("Source MAC address: {sorc_mac} \nDestination MAC address: {dest_mac}".format(sorc_mac=sorc_mac, dest_mac=dest_mac))
+                print("Source IP address: {sorc_ip} \nDestination IP address: {dest_ip}".format(sorc_ip=sorc_ip, dest_ip=dest_ip))
                 print("Protocol: " + protocol)
                 print("Data length: " + data_length)
                 print("Data: " + data)
 
             
                 ethernet_header = router1_mac + node1_mac
-                IP_header = source_ip + destination_ip + protocol
+                IP_header = sorc_ip + dest_ip + protocol
                 packet = ethernet_header + IP_header + data_length + data
-                destination_socket = arp_socket[node1_mac]
-                destination_socket.send(bytes(packet, "utf-8"))
+                dest = arp_socket[node1_mac]
+                dest.send(bytes(packet, "utf-8"))
         except socket.error as e:
             print("Socket error:", e)
 
@@ -137,9 +137,6 @@ node3_ip = "0x2B"
 
 arp_socket = {node1_mac: node1, node2_mac: node2, node3_mac: node3}
 arp_mac = {node1_ip: node1_mac, node2_ip: node2_mac, node3_ip: node3_mac}
-
-# Start threads to receive from each node
-import threading
 
 receive_node1_thread = threading.Thread(target=receive_from_node1, args=(node1, arp_socket, arp_mac, router2_mac))
 receive_node1_thread.start()

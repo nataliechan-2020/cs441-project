@@ -31,7 +31,7 @@ node3_ip = "0x2B"
 
 arp_mac = {node1_ip : router_mac, node3_ip : node3_mac}
 
-def send_outgoing_packet():
+def send_packet():
     print("\nOUTGOING PACKET:")
     ethernet_header = ""
     IP_header = ""
@@ -48,43 +48,40 @@ def send_outgoing_packet():
         print("[ERROR] Wrong protocol inputed")
         protocol = input("Enter protocol: ")
 
-    destination_ip = input("Enter destination IP: ")
-    while destination_ip != node1_ip and destination_ip != node3_ip:
+    dest_ip = input("Enter destination IP: ")
+    while dest_ip != node1_ip and dest_ip != node3_ip:
         print("[ERROR] Wrong destination IP inputed")
-        destination_ip = input("Enter destination IP: ")
+        dest_ip = input("Enter destination IP: ")
 
     # unicast -> to router and node2
-    IP_header = IP_header + node2_ip + destination_ip + protocol
-    ethernet_header = ethernet_header + node2_mac + arp_mac[destination_ip]
+    IP_header = IP_header + node2_ip + dest_ip + protocol
+    ethernet_header = ethernet_header + node2_mac + arp_mac[dest_ip]
     packet = ethernet_header + IP_header + str(data_length) + data
     node2.send(bytes(packet, "utf-8"))
     node3.send(bytes(packet, "utf-8"))
 
 
 
-def receive_incoming_packet():
+def receive_packet():
     while True:
         # receive from router
         received_message = node2.recv(1024)
         received_message = received_message.decode("utf-8")
-
-        print("Received message from router:", received_message)
-
-        source_mac = received_message[0:2]
-        destination_mac = received_message[2:4]
-        source_ip = received_message[4:8]
-        destination_ip =  received_message[8:12]
+        sorc_mac = received_message[0:2]
+        dest_mac = received_message[2:4]
+        sorc_ip = received_message[4:8]
+        dest_ip =  received_message[8:12]
         protocol = received_message[12:14]
         data_length = received_message[14:15]
         data = received_message[15:]
 
         # drop packet
-        if destination_mac != node2_mac:
+        if dest_mac != node2_mac:
             print("\nPACKET DROPPED")
         else:
             print("\nINCOMING PACKET:")
-            print("Source MAC address: {source_mac} \nDestination MAC address: {destination_mac}".format(source_mac=source_mac, destination_mac=destination_mac))
-            print("Source IP address: {source_ip} \nDestination IP address: {destination_ip}".format(source_ip=source_ip, destination_ip=destination_ip))
+            print("Source MAC address: {sorc_mac} \nDestination MAC address: {dest_mac}".format(sorc_mac=sorc_mac, dest_mac=dest_mac))
+            print("Source IP address: {sorc_ip} \nDestination IP address: {dest_ip}".format(sorc_ip=sorc_ip, dest_ip=dest_ip))
             print("Protocol: " + protocol)
             print("Data length: " + data_length)
             print("Data: " + data)
@@ -92,14 +89,13 @@ def receive_incoming_packet():
             # ping reply, unicast -> reply to router and node3
             if protocol == "0P":
                 protocol = "0R"
-                ethernet_header = node2_mac + arp_mac[source_ip]
-                IP_header = node2_ip + source_ip + protocol
+                ethernet_header = node2_mac + arp_mac[sorc_ip]
+                IP_header = node2_ip + sorc_ip + protocol
                 packet = ethernet_header + IP_header + data_length + data
                 node2.send(bytes(packet, "utf-8"))
                 node3.send(bytes(packet, "utf-8"))
 
-           
             # send new packet
-            send_outgoing_packet()
-send_outgoing_packet()
-receive_incoming_packet()
+            send_packet()
+send_packet()
+receive_packet()
