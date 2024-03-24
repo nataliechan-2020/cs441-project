@@ -1,5 +1,6 @@
 import socket
 import time
+from functions import send_node
 
 # initialise IP and MAC addresses
 node3_ip = "0x2B"
@@ -77,28 +78,7 @@ def send_packet():
     print("\nOUTGOING PACKET:")
     ethernet_header = ""
     IP_header = ""
-    data = input("Enter data: ")
-    data_length = len(data)
-
-    while data_length >= 10:
-        print("[ERROR] Data too large")
-        data = input("Enter data: ")
-        data_length = len(data)
-    
-    protocol = input("Enter protocol: ")
-    while protocol != "0P" and protocol != "1K":
-        print("[ERROR] Wrong protocol inputed")
-        protocol = input("Enter protocol: ")
-
-    dest_ip = input("Enter destination IP: ")
-    while dest_ip != node1_ip and dest_ip != node2_ip:
-        print("[ERROR] Wrong destination IP inputed")
-        dest_ip = input("Enter destination IP: ")
-
-    # unicast -> to router and node2
-    IP_header = IP_header + node3_ip + dest_ip + protocol
-    ethernet_header = ethernet_header + node3_mac + arp_mac[dest_ip]
-    packet = ethernet_header + IP_header + str(data_length) + data
+    packet = send_node(3, node1_ip, node2_ip, node3_ip, node3_mac, None, arp_mac, ethernet_header, IP_header)
     node3.send(bytes(packet, "utf-8"))
     intra3.send(bytes(packet, "utf-8"))
 

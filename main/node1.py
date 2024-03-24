@@ -1,5 +1,6 @@
 import socket
 import time
+from functions import send_node
 
 # Initialise IP and MAC addresses
 node1_ip = "0x1A"
@@ -36,27 +37,7 @@ def send_packet():
                     receive_packet(received_message)
                     break
         except TimeoutError:
-            data = input("Enter data: ")
-            data_length = len(data)
-            while data_length >= 10:
-                print("[ERROR] Data too large")
-                data = input("Enter data: ")
-                data_length = len(data)
-
-            protocol = input("Enter protocol: ")
-            while protocol != "0P" and protocol != "1K":
-                print("[ERROR] Wrong protocol inputed")
-                protocol = input("Enter protocol: ")
-
-            dest_ip = input("Enter destination IP: ")
-            while dest_ip != node2_ip and dest_ip != node3_ip:
-                print("[ERROR] Wrong destination IP inputed")
-                dest_ip = input("Enter destination IP: ")
-
-            # Send to router
-            IP_header = IP_header + node1_ip + dest_ip + protocol
-            ethernet_header = ethernet_header + node1_mac + router_mac
-            packet = ethernet_header + IP_header + str(data_length) + data
+            packet = send_node(1, node2_ip, node3_ip, node1_ip, node1_mac, router_mac, None, ethernet_header, IP_header)
             node1.send(bytes(packet, "utf-8"))
             
             break
@@ -77,10 +58,7 @@ def receive_packet(received_msg):
             protocol = received_message[12:14]
             data_length = received_message[14:15]
             data = received_message[15:]
-
-            print("Received message from router:", received_message)
         else:
-            print("hello")
             sorc_mac = received_msg[0:2]
             dest_mac = received_msg[2:4]
             sorc_ip = received_msg[4:8]
@@ -106,7 +84,6 @@ def receive_packet(received_msg):
                 ethernet_header = node1_mac + router_mac
                 IP_header = node1_ip + sorc_ip + protocol
                 packet = ethernet_header + IP_header + data_length + data
-                node1.send(bytes(packet, "utf-8"))
                 node1.send(bytes(packet, "utf-8"))
 
             send_packet()  
