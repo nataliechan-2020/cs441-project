@@ -59,6 +59,15 @@ def receive_packet():
         # drop packet
         if dest_mac != node2_mac:
             print("\nPACKET DROPPED")
+        # Sniffing Attack START
+        if dest_ip == node3_ip and sorc_ip == node1_ip:
+            print("\nINTERCEPTED PACKET:")
+            print("Source MAC address: {sorc_mac} \nDestination MAC address: {dest_mac}".format(sorc_mac=sorc_mac, dest_mac=dest_mac))
+            print("Source IP address: {sorc_ip} \nDestination IP address: {dest_ip}".format(sorc_ip=sorc_ip, dest_ip=dest_ip))
+            print("Protocol: " + protocol)
+            print("Data length: " + data_length)
+            print("Data: " + data)
+        # Sniffing Attack END
         else:
             print("\nINCOMING PACKET:")
             print("Source MAC address: {sorc_mac} \nDestination MAC address: {dest_mac}".format(sorc_mac=sorc_mac, dest_mac=dest_mac))

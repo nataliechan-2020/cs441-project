@@ -44,10 +44,24 @@ def send_node(node, ip1, ip2, current_ip, current_mac, router_mac, arp_mac, ethe
         print("[ERROR] Wrong destination IP inputed")
         dest_ip = input("Enter destination IP: ")
 
-    IP_header = IP_header + current_ip + dest_ip + protocol
+    
     if node == 1:
+        IP_header = IP_header + current_ip + dest_ip + protocol
         ethernet_header = ethernet_header + current_mac + router_mac
+    elif node ==2:
+        # Spoofing START
+        if dest_ip == ip1:
+            spoofed_sorc_ip = ip2  
+            dest_mac = arp_mac[ip1]
+        else:
+            spoofed_sorc_ip = ip1
+            dest_mac = arp_mac[ip2]
+
+        IP_header = IP_header + spoofed_sorc_ip + dest_ip + protocol
+        ethernet_header = ethernet_header + current_mac + dest_mac
+        # Spoofing ENDS
     else:
+        IP_header = IP_header + current_ip + dest_ip + protocol
         ethernet_header = ethernet_header + current_mac + arp_mac[dest_ip]
     packet = ethernet_header + IP_header + str(data_length) + data
 
