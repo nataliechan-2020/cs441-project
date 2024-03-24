@@ -1,11 +1,15 @@
 import socket
 import threading
 from functions import receive_router
+from logs import clear_log, create_logfile
 # Initialise IP and MAC addresses
 router1_ip = "0x11"
 router1_mac = "R1"
 router2_ip = "0x21"
 router2_mac = "R2"
+
+create_logfile()
+clear_log()
 
 def from_node1(node1, arp_socket, arp_mac, router2_mac):
     while True:
@@ -13,7 +17,7 @@ def from_node1(node1, arp_socket, arp_mac, router2_mac):
             # Receive from node1
             received_message = node1.recv(1024).decode("utf-8")
             print("-- NODE 1 ---")
-            sorc_mac, sorc_ip, dest_mac, dest_ip, protocol, data_length, data, packet_dropped = receive_router(received_message, 1, None)
+            sorc_mac, sorc_ip, dest_mac, dest_ip, protocol, data_length, data, packet_dropped = receive_router(received_message, 1, None, arp_mac)
 
             # Forward packet to node2
             IP_header = sorc_ip + dest_ip + protocol
@@ -36,7 +40,7 @@ def from_node2(node2, arp_socket, arp_mac, router1_mac):
             received_message = node2.recv(1024).decode("utf-8")
             print("-- NODE 2 --")
            
-            sorc_mac, sorc_ip, dest_mac, dest_ip, protocol, data_length, data, packet_dropped = receive_router(received_message, 2, router2_mac)
+            sorc_mac, sorc_ip, dest_mac, dest_ip, protocol, data_length, data, packet_dropped = receive_router(received_message, 2, router2_mac, arp_mac)
             if packet_dropped == False:
                 # Send packet back to node1
                 IP_header = sorc_ip + dest_ip + protocol
@@ -54,7 +58,7 @@ def from_node3(node3, arp_socket, node1_ip, router1_mac):
             # Receive from node3
             received_message = node3.recv(1024).decode("utf-8")
             print("-- NODE 3 --")
-            sorc_mac, sorc_ip, dest_mac, dest_ip, protocol, data_length, data, packet_dropped = receive_router(received_message, 3, node1_ip)
+            sorc_mac, sorc_ip, dest_mac, dest_ip, protocol, data_length, data, packet_dropped = receive_router(received_message, 3, node1_ip, arp_mac)
             if packet_dropped == False:
                 IP_header = sorc_ip + dest_ip + protocol
                 ethernet_header = router1_mac + node1_mac

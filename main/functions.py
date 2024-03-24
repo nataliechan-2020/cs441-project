@@ -1,4 +1,5 @@
-def receive_router (received_message, node, compare):
+from logs import flag_ip_spoofing, log
+def receive_router (received_message, node, compare, arp_mac):
     sorc_mac = received_message[0:2]
     dest_mac = received_message[2:4]
     sorc_ip = received_message[4:8]
@@ -7,6 +8,7 @@ def receive_router (received_message, node, compare):
     data_length = received_message[14:15]
     data = received_message[15:]
     
+
     packet_dropped = False
     if node == 2:
         if dest_mac != compare:
@@ -17,6 +19,11 @@ def receive_router (received_message, node, compare):
             print("\n PACKET DROPPED")
             packet_dropped = True 
     if packet_dropped == False:
+        if (arp_mac[sorc_ip] != sorc_mac):
+            flag_ip_spoofing(sorc_ip, dest_ip)
+        else:
+            log(sorc_ip, dest_ip, data)
+            
         print("\nINCOMING PACKET {node}:".format(node=node))
         print("Source MAC address:", sorc_mac, "\nDestination MAC address:", dest_mac)
         print("Source IP address:", sorc_ip, "\nDestination IP address:", dest_ip)
