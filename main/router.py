@@ -2,6 +2,7 @@ import socket
 import threading
 from functions import receive_router
 from logs import clear_log, create_logfile
+
 # Initialise IP and MAC addresses
 router1_ip = "0x11"
 router1_mac = "R1"
@@ -10,6 +11,19 @@ router2_mac = "R2"
 
 create_logfile()
 clear_log()
+
+# Rate Limiting
+def initialize_counter():
+    count=[0]
+
+    def count_times():
+        count[0]+=1
+        if count[0] >= 10:
+            print("EXIT")
+            raise SystemExit
+        return count[0]
+    return count_times
+counter = initialize_counter()
 
 def from_node1(node1, arp_socket, arp_mac, router2_mac):
     while True:
@@ -30,6 +44,8 @@ def from_node1(node1, arp_socket, arp_mac, router2_mac):
             dest = arp_socket[node3_mac]
             dest.send(bytes(packet, "utf-8"))
 
+            
+            print(counter())
         except socket.error as e:
             print("Socket error:", e)
 
@@ -48,7 +64,8 @@ def from_node2(node2, arp_socket, arp_mac, router1_mac):
                 packet = ethernet_header + IP_header + data_length + data
                 dest = arp_socket[node1_mac]
                 dest.send(bytes(packet, "utf-8"))
-
+            
+            print(counter())
         except socket.error as e:
             print("Socket error:", e)
 
@@ -65,6 +82,8 @@ def from_node3(node3, arp_socket, node1_ip, router1_mac):
                 packet = ethernet_header + IP_header + data_length + data
                 dest = arp_socket[node1_mac]
                 dest.send(bytes(packet, "utf-8"))
+            
+            print(counter())
         except socket.error as e:
             print("Socket error:", e)
 
