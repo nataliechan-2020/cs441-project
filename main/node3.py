@@ -1,6 +1,7 @@
 import socket
 import time
 from functions import send_node
+from logs import log_ip
 
 # initialise IP and MAC addresses
 node3_ip = "0x2B"
@@ -28,16 +29,27 @@ node2_ip = "0x2A"
 arp_mac = {node1_ip : router_mac, node2_ip : node2_mac}
 
 blocked_ips = []
+# blocked_protocol = []
+ips = ""
+# protocols = ""
+for i in blocked_ips:
+    ips+= ", "  + i
+# for i in blocked_protocol:
+#     protocols+= ", "  + i
+
+log_ip(ips, "initial")
 
 def add_blocked_ip(ip):
     blocked_ips.append(ip)
     print("ADDED")
     print(blocked_ips)
+    log_ip(ip, "add")
     main()
 
 def remove_blocked_ip(ip):
     if ip in blocked_ips:
         blocked_ips.remove(ip)
+        log_ip(ip, "remove")
         print("REMOVED")
         print(blocked_ips)
     else:

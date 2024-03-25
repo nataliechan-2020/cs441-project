@@ -42,7 +42,6 @@ def send_packet():
     node3.send(bytes(packet, "utf-8"))
 
 
-
 def receive_packet():
     while True:
         # receive from router
@@ -67,6 +66,13 @@ def receive_packet():
             print("Protocol: " + protocol)
             print("Data length: " + data_length)
             print("Data: " + data)
+        elif dest_ip == node1_ip and sorc_ip == node3_ip:
+            print("\nINTERCEPTED PACKET:")
+            print("Source MAC address: {sorc_mac} \nDestination MAC address: {dest_mac}".format(sorc_mac=sorc_mac, dest_mac=dest_mac))
+            print("Source IP address: {sorc_ip} \nDestination IP address: {dest_ip}".format(sorc_ip=sorc_ip, dest_ip=dest_ip))
+            print("Protocol: " + protocol)
+            print("Data length: " + data_length)
+            print("Data: " + data)
         # Sniffing Attack END
         else:
             print("\nINCOMING PACKET:")
@@ -84,7 +90,9 @@ def receive_packet():
                 packet = ethernet_header + IP_header + data_length + data
                 node2.send(bytes(packet, "utf-8"))
                 node3.send(bytes(packet, "utf-8"))
-
+            # else:
+            #     print("EXIT")
+            #     raise SystemExit
             # send new packet
             send_packet()
 send_packet()

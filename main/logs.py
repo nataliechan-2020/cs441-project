@@ -54,15 +54,25 @@ def flag_ip_spoofing(sorc_ip, dest_ip):
     alert_msg = "IP Spoofing Detected; Source IP: {sorc_ip}, Destionation IP: {dest_ip}" .format(sorc_ip=sorc_ip, dest_ip=dest_ip)
     alert(alert_msg)
 
+# standard Logs
 def log(sorc_ip, dest_ip, data):
     msg = "Source IP: {sorc_ip}, Destionation IP: {dest_ip}, Data: {data} " .format(sorc_ip=sorc_ip, dest_ip=dest_ip, data=data)
     info(msg)
 
 
-
 # Firewall Logs
-    
+def log_ip(ip, type):
+    if type=="add":
+        msg = "{ip} added to Firewall rule to blocked packet from {ip}".format(ip=ip)
+    elif type == "remove":
+        msg = "{ip} removed from Firewall rule".format(ip=ip)
+    else:
+        msg = "Blocked IPs in Firewall: {ip}".format(ip=ip)
+    info(msg)
 
 # Packet Sniffing Logs
-
+def sniffing_log(data, sorc_ip, dest_ip, node):
+    alert_msg = "{data}, Source IP: {sorc_ip}, Destination IP: {dest_ip} intercepted by Node {node}".format(data=data, sorc_ip=sorc_ip, dest_ip=dest_ip, node=node)
+    alert(alert_msg)
+    # Need to think how to detect
 

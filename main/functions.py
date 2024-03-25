@@ -1,4 +1,5 @@
 from logs import flag_ip_spoofing, log
+
 def receive_router (received_message, node, compare, arp_mac):
     sorc_mac = received_message[0:2]
     dest_mac = received_message[2:4]
@@ -71,5 +72,6 @@ def send_node(node, ip1, ip2, current_ip, current_mac, router_mac, arp_mac, ethe
         IP_header = IP_header + current_ip + dest_ip + protocol
         ethernet_header = ethernet_header + current_mac + arp_mac[dest_ip]
     packet = ethernet_header + IP_header + str(data_length) + data
+    
 
     return packet
