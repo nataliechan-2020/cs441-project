@@ -70,6 +70,15 @@ def log_ip(ip, type):
         msg = "Blocked IPs in Firewall: {ip}".format(ip=ip)
     info(msg)
 
+def log_protocol(protocol, type):
+    if type=="add":
+        msg = "{protocol} added to Firewall rule to blocked packet".format(protocol=protocol)
+    elif type == "remove":
+        msg = "{protocol} removed from Firewall rule".format(protocol=protocol)
+    else:
+        msg = "Blocked IPs in Firewall: {protocol}".format(protocol=protocol)
+    info(msg)
+
 # Packet Sniffing Logs
 def sniffing_log(data, sorc_ip, dest_ip, node):
     alert_msg = "{data}, Source IP: {sorc_ip}, Destination IP: {dest_ip} intercepted by Node {node}".format(data=data, sorc_ip=sorc_ip, dest_ip=dest_ip, node=node)

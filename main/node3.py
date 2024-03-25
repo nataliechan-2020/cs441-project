@@ -1,7 +1,7 @@
 import socket
 import time
 from functions import send_node
-from logs import log_ip
+from logs import log_ip, log_protocol
 
 # initialise IP and MAC addresses
 node3_ip = "0x2B"
@@ -29,13 +29,13 @@ node2_ip = "0x2A"
 arp_mac = {node1_ip : router_mac, node2_ip : node2_mac}
 
 blocked_ips = []
-# blocked_protocol = []
+blocked_protocol = []
 ips = ""
-# protocols = ""
+protocols = ""
 for i in blocked_ips:
     ips+= ", "  + i
-# for i in blocked_protocol:
-#     protocols+= ", "  + i
+for i in blocked_protocol:
+    protocols+= ", "  + i
 
 log_ip(ips, "initial")
 
@@ -57,17 +57,39 @@ def remove_blocked_ip(ip):
         print(blocked_ips)
     main()
 
+def add_blocked_protocol(protocol):
+    blocked_protocol.append(protocol)
+    print("ADDED")
+    print(blocked_protocol)
+    log_protocol(protocol, "add")
+    main()
+
+def remove_blocked_protocol(protocol):
+    if protocol in blocked_protocol:
+        blocked_protocol.remove(protocol)
+        log_protocol(protocol, "remove")
+        print("REMOVED")
+        print(blocked_protocol)
+    else:
+        print("NOT FOUND")
+        print(blocked_protocol)
+    main()
+
 
 def main ():
     option = input("Choose 1, 2 or 3: "  + 
                    "\n1) Add Blocked IP to Firewall" + 
                    "\n2) Remove Blocked IP from Firewall" +
-                    "\n3) Send/Receive Packet: \n")
-    while int(option) not in [1,2,3]:
+                   "\n3) Add Blocked Protocol to Firewall" + 
+                   "\n4) Remove Blocked Protocol From Firewall" +
+                    "\n5) Send/Receive Packet: \n")
+    while int(option) not in [1,2,3, 4, 5]:
         option = input("Choose 1, 2 or 3:" + 
                        "\n1) Add Blocked IP to Firewall" + 
                        "\n2) Remove Blocked IP from Firewall" +
-                       "\n3) Send/Receive Packet: \n")
+                       "\n3) Add Blocked Protocol to Firewall" + 
+                        "\n4) Remove Blocked Protocol From Firewall" + 
+                        "\n5) Send/Receive Packet: \n")
     option = int(option)
 
     if option == 1:
@@ -81,6 +103,17 @@ def main ():
         while ip != node1_ip and ip != node2_ip:
             ip = input("Enter IP Address:")
         remove_blocked_ip(ip)
+    elif option == 3:
+        protocol = input("Enter Protocol: ")
+        while protocol != "0P" and protocol!="1K":
+            protocol = input("Enter Protocol:")
+        add_blocked_protocol(protocol)
+    elif option == 4:
+        protocol = input("Enter Protocol: ")
+        while protocol != "0P" and protocol!="1K":
+            protocol = input("Enter Protocol:")
+        remove_blocked_protocol(protocol)
+
     else:
         send_packet()
         receive_packet()   
@@ -124,9 +157,13 @@ def receive_packet():
         if sorc_ip in blocked_ips and sorc_ip!=node3_ip:
             print("FIREWALL BLOCKED")
             continue
+        # Not Working need to test why
+        elif protocol in blocked_protocol and sorc_ip!=node3_ip:
+            print("FIREWALL BLOCKED")
+            continue
 
         # drop packet
-        if dest_mac != node3_mac and sorc_ip==node3_ip:
+        elif dest_mac != node3_mac and sorc_ip==node3_ip:
             print("\nPACKET DROPPED")
         else:
             print(sorc_ip)
