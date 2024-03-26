@@ -1,6 +1,7 @@
 import socket
 import time
 from functions import send_node
+from logs import sniffing_log
 
 # Initialise IP and MAC addresses
 node2_ip = "0x2A"
@@ -58,21 +59,24 @@ def receive_packet():
         # drop packet
         if dest_mac != node2_mac:
             print("\nPACKET DROPPED")
+
         # Sniffing Attack START
-        if dest_ip == node3_ip and sorc_ip == node1_ip:
+        if dest_ip == node3_ip and sorc_ip == node1_ip and dest_mac!="N2":
             print("\nINTERCEPTED PACKET:")
             print("Source MAC address: {sorc_mac} \nDestination MAC address: {dest_mac}".format(sorc_mac=sorc_mac, dest_mac=dest_mac))
             print("Source IP address: {sorc_ip} \nDestination IP address: {dest_ip}".format(sorc_ip=sorc_ip, dest_ip=dest_ip))
             print("Protocol: " + protocol)
             print("Data length: " + data_length)
             print("Data: " + data)
-        elif dest_ip == node1_ip and sorc_ip == node3_ip:
+            sniffing_log(data, sorc_ip, dest_ip, 2)
+        elif dest_ip == node1_ip and sorc_ip == node3_ip and dest_mac!="N2":
             print("\nINTERCEPTED PACKET:")
             print("Source MAC address: {sorc_mac} \nDestination MAC address: {dest_mac}".format(sorc_mac=sorc_mac, dest_mac=dest_mac))
             print("Source IP address: {sorc_ip} \nDestination IP address: {dest_ip}".format(sorc_ip=sorc_ip, dest_ip=dest_ip))
             print("Protocol: " + protocol)
             print("Data length: " + data_length)
             print("Data: " + data)
+            sniffing_log(data, sorc_ip, dest_ip, 2)
         # Sniffing Attack END
         else:
             print("\nINCOMING PACKET:")
@@ -90,9 +94,9 @@ def receive_packet():
                 packet = ethernet_header + IP_header + data_length + data
                 node2.send(bytes(packet, "utf-8"))
                 node3.send(bytes(packet, "utf-8"))
-            # else:
-            #     print("EXIT")
-            #     raise SystemExit
+            elif protocol == "1K":
+                print("EXIT")
+                # raise SystemExit
             # send new packet
             send_packet()
 send_packet()

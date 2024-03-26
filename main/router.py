@@ -18,7 +18,7 @@ def initialize_counter():
 
     def count_times():
         count[0]+=1
-        if count[0] >= 10:
+        if count[0] >= 20:
             print("EXIT")
             raise SystemExit
         return count[0]

@@ -57,16 +57,17 @@ def send_node(node, ip1, ip2, current_ip, current_mac, router_mac, arp_mac, ethe
         IP_header = IP_header + current_ip + dest_ip + protocol
         ethernet_header = ethernet_header + current_mac + router_mac
     elif node ==2:
+        print(ip1)
         # Spoofing START
         if dest_ip == ip1:
             spoofed_sorc_ip = ip2  
             dest_mac = arp_mac[ip1]
+        
+            IP_header = IP_header + spoofed_sorc_ip + dest_ip + protocol
+            ethernet_header = ethernet_header + current_mac + dest_mac
         else:
-            spoofed_sorc_ip = ip1
-            dest_mac = arp_mac[ip2]
-
-        IP_header = IP_header + spoofed_sorc_ip + dest_ip + protocol
-        ethernet_header = ethernet_header + current_mac + dest_mac
+            IP_header = IP_header + current_ip + dest_ip + protocol
+            ethernet_header = ethernet_header + current_mac + arp_mac[dest_ip]
         # Spoofing ENDS
     else:
         IP_header = IP_header + current_ip + dest_ip + protocol

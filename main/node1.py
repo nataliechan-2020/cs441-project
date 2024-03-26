@@ -1,6 +1,7 @@
 import socket
 import time
 from functions import send_node
+from logs import sniffing_log
 
 # Initialise IP and MAC addresses
 node1_ip = "0x1A"
@@ -67,9 +68,14 @@ def receive_packet(received_msg):
             data_length = received_msg[14:15]
             data = received_msg[15:]
 
+        
+
         if dest_mac != node1_mac:
             print("\nPACKET DROPPED")
-   
+        elif dest_ip == node2_ip and sorc_ip ==node3_ip:
+            sniffing_log(data, sorc_ip, dest_ip, 1)
+        elif dest_ip == node3_ip and sorc_ip == node2_ip:
+            sniffing_log(data, sorc_ip, dest_ip, 1)
         else:
             print("\nINCOMING PACKET:")
             print("Source MAC address: {sorc_mac} \nDestination MAC address: {dest_mac}".format(sorc_mac=sorc_mac, dest_mac=dest_mac))
@@ -85,7 +91,8 @@ def receive_packet(received_msg):
                 IP_header = node1_ip + sorc_ip + protocol
                 packet = ethernet_header + IP_header + data_length + data
                 node1.send(bytes(packet, "utf-8"))
-
+            elif protocol == "1K":
+                print("EXIT")
             send_packet()  
 
 send_packet()  
