@@ -32,11 +32,14 @@ def send_packet():
             received_message = node1.recv(1024)
             if received_message:
                 received_message = received_message.decode("utf-8")
-                data_size = received_message[14:15]
+                received_message = received_message.split(',')
+                
+                data_size = received_message[6]
 
                 if int(data_size) > 0:
                     receive_packet(received_message)
                     break
+        
         except TimeoutError:
             packet = send_node(1, node2_ip, node3_ip, node1_ip, node1_mac, router_mac, None, ethernet_header, IP_header)
             node1.send(bytes(packet, "utf-8"))
@@ -52,23 +55,26 @@ def receive_packet(received_msg):
         if received_msg== "":
             received_message = node1.recv(1024)
             received_message = received_message.decode("utf-8")
-            sorc_mac = received_message[0:2]
-            dest_mac = received_message[2:4]
-            sorc_ip = received_message[4:8]
-            dest_ip =  received_message[8:12]
-            protocol = received_message[12:14]
-            data_length = received_message[14:15]
-            data = received_message[15:]
-        else:
-            sorc_mac = received_msg[0:2]
-            dest_mac = received_msg[2:4]
-            sorc_ip = received_msg[4:8]
-            dest_ip =  received_msg[8:12]
-            protocol = received_msg[12:14]
-            data_length = received_msg[14:15]
-            data = received_msg[15:]
+            received_message = received_message.split(',')
 
-        
+            sorc_mac = received_message[0]
+            dest_mac = received_message[1]
+            payload_length = received_message[2]
+            sorc_ip = received_message[3]
+            dest_ip =  received_message[4]
+            protocol = received_message[5]
+            data_length = received_message[6]
+            data = received_message[7]
+
+        else:
+            sorc_mac = received_message[0]
+            dest_mac = received_message[1]
+            payload_length = received_message[2]
+            sorc_ip = received_message[3]
+            dest_ip =  received_message[4]
+            protocol = received_message[5]
+            data_length = received_message[6]
+            data = received_message[7]
 
         if dest_mac != node1_mac:
             print("\nPACKET DROPPED")
@@ -87,9 +93,13 @@ def receive_packet(received_msg):
             # ping reply, unicast -> reply to router and node3
             if protocol == "0P":
                 protocol = "0R"
-                ethernet_header = node1_mac + router_mac
-                IP_header = node1_ip + sorc_ip + protocol
-                packet = ethernet_header + IP_header + data_length + data
+                ethernet_header = node1_mac + "," + router_mac
+                IP_header = node1_ip + "," + sorc_ip + "," + protocol
+
+                payload = IP_header + "," + data_length + "," + data
+                payload_length = len(payload_length) - 4
+                packet = ethernet_header + "," + IP_header + "," + str(payload_length) + "," + payload
+                
                 node1.send(bytes(packet, "utf-8"))
             elif protocol == "1K":
                 print("EXIT")
