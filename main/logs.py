@@ -78,7 +78,10 @@ def log_protocol(protocol, type):
     else:
         msg = "Blocked IPs in Firewall: {protocol}".format(protocol=protocol)
     info(msg)
-
+def blocked_data (ip):
+    msg = "Blocked incoming message from {ip}".format(ip=ip)
+    info(msg)
+    
 # Packet Sniffing Logs
 def sniffing_log(data, sorc_ip, dest_ip, node):
     alert_msg = "{data}, Source IP: {sorc_ip}, Destination IP: {dest_ip} intercepted by Node {node}".format(data=data, sorc_ip=sorc_ip, dest_ip=dest_ip, node=node)

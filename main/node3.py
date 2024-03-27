@@ -1,7 +1,7 @@
 import socket
 import time
 from functions import send_node
-from logs import log_ip, log_protocol, sniffing_log
+from logs import log_ip, log_protocol, sniffing_log, blocked_data
 
 # initialise IP and MAC addresses
 node3_ip = "0x2B"
@@ -157,10 +157,12 @@ def receive_packet():
         
         if sorc_ip in blocked_ips and sorc_ip!=node3_ip:
             print("FIREWALL BLOCKED")
+            blocked_data(sorc_ip)
             continue
 
         elif protocol in blocked_protocol and sorc_ip!=node3_ip:
             print("FIREWALL BLOCKED")
+            blocked_data(protocol)
             continue
         
         # drop packet
