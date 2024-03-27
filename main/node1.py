@@ -97,9 +97,11 @@ def receive_packet(received_msg):
                 IP_header = node1_ip + "," + sorc_ip + "," + protocol
 
                 payload = IP_header + "," + data_length + "," + data
-                payload_length = len(payload_length) - 4
-                packet = ethernet_header + "," + IP_header + "," + str(payload_length) + "," + payload
+                # print(payload)
+                payload_length = len(payload) - 4
+                packet = ethernet_header + "," + str(payload_length) + "," + payload
                 
+                # print(packet)
                 node1.send(bytes(packet, "utf-8"))
             elif protocol == "1K":
                 print("EXIT")

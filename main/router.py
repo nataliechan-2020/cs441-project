@@ -31,10 +31,12 @@ def from_node1(node1, arp_socket, arp_mac, router2_mac):
             # Receive from node1
             received_message = node1.recv(1024).decode("utf-8")
             print("-- NODE 1 ---")
+            print(received_message)
             sorc_mac, sorc_ip, payload_length, dest_mac, dest_ip, protocol, data_length, data, packet_dropped = receive_router(received_message, 1, None, arp_mac)
 
             # Forward packet to node2
             IP_header = sorc_ip + "," + dest_ip + "," + protocol
+            print(dest_ip)
             ethernet_header = router2_mac + "," + arp_mac[dest_ip]
             packet = ethernet_header + "," + payload_length + "," + IP_header + "," + data_length + "," + data
             dest = arp_socket[node2_mac]
@@ -54,7 +56,7 @@ def from_node2(node2, arp_socket, arp_mac, router1_mac):
             # Receive from node2
             received_message = node2.recv(1024).decode("utf-8")
             print("-- NODE 2 --")
-           
+            print(received_message)
             sorc_mac, sorc_ip, payload_length, dest_mac, dest_ip, protocol, data_length, data, packet_dropped = receive_router(received_message, 2, router2_mac, arp_mac)
             if packet_dropped == False:
                 # Send packet back to node1

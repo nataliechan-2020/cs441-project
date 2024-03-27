@@ -2,6 +2,7 @@ from logs import flag_ip_spoofing, log
 
 def receive_router (received_message, node, compare, arp_mac):
     received_message = received_message.split(',')
+    print(received_message)
 
     sorc_mac = received_message[0]
     dest_mac = received_message[1]
