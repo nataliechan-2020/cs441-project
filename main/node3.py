@@ -186,11 +186,15 @@ def receive_packet():
             # ping reply, unicast -> reply to router and node2
             if protocol == "0P":
                 protocol = "0R"
-                ethernet_header = node3_mac + arp_mac[sorc_ip]
-                IP_header = node3_ip + sorc_ip + protocol
-                packet = ethernet_header + IP_header + data_length + data
+                ethernet_header = node3_mac + "," + arp_mac[sorc_ip]
+                IP_header = node3_ip + "," + sorc_ip + "," + protocol
+
+                payload = IP_header + "," + data_length + "," + data
+                payload_length = len(payload) - 4
+                packet = ethernet_header + "," + str(payload_length) + "," + payload
                 node3.send(bytes(packet, "utf-8"))
                 intra3.send(bytes(packet, "utf-8")) 
+
             elif protocol == "1K":
                 print("EXIT")
             send_packet() 
@@ -230,9 +234,13 @@ def receive_packet():
             # ping reply, unicast -> reply to router and node2
             if protocol == "0P":
                 protocol = "0R"
-                ethernet_header = node3_mac + arp_mac[sorc_ip]
-                IP_header = node3_ip + sorc_ip + protocol
-                packet = ethernet_header + IP_header + data_length + data
+                ethernet_header = node3_mac + "," + arp_mac[sorc_ip]
+                IP_header = node3_ip + "," + sorc_ip + "," + protocol
+
+                payload = IP_header + "," + data_length + "," + data
+                payload_length = len(payload) - 4
+                packet = ethernet_header + "," + str(payload_length) + "," + payload
+
                 node3.send(bytes(packet, "utf-8"))
                 intra3.send(bytes(packet, "utf-8")) 
             elif protocol == "1K":

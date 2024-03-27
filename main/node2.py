@@ -48,13 +48,16 @@ def receive_packet():
         # receive from router
         received_message = node2.recv(1024)
         received_message = received_message.decode("utf-8")
-        sorc_mac = received_message[0:2]
-        dest_mac = received_message[2:4]
-        sorc_ip = received_message[4:8]
-        dest_ip =  received_message[8:12]
-        protocol = received_message[12:14]
-        data_length = received_message[14:15]
-        data = received_message[15:]
+        received_message = received_message.split(',')
+
+        sorc_mac = received_message[0]
+        dest_mac = received_message[1]
+        payload_length = received_message[2]
+        sorc_ip = received_message[3]
+        dest_ip =  received_message[4]
+        protocol = received_message[5]
+        data_length = received_message[6]
+        data = received_message[7]
 
         # drop packet
         if dest_mac != node2_mac:
@@ -69,6 +72,7 @@ def receive_packet():
             print("Data length: " + data_length)
             print("Data: " + data)
             sniffing_log(data, sorc_ip, dest_ip, 2)
+        
         elif dest_ip == node1_ip and sorc_ip == node3_ip and dest_mac!="N2":
             print("\nINTERCEPTED PACKET:")
             print("Source MAC address: {sorc_mac} \nDestination MAC address: {dest_mac}".format(sorc_mac=sorc_mac, dest_mac=dest_mac))
@@ -78,6 +82,7 @@ def receive_packet():
             print("Data: " + data)
             sniffing_log(data, sorc_ip, dest_ip, 2)
         # Sniffing Attack END
+       
         else:
             print("\nINCOMING PACKET:")
             print("Source MAC address: {sorc_mac} \nDestination MAC address: {dest_mac}".format(sorc_mac=sorc_mac, dest_mac=dest_mac))
@@ -89,16 +94,21 @@ def receive_packet():
             # ping reply, unicast -> reply to router and node3
             if protocol == "0P":
                 protocol = "0R"
-                ethernet_header = node2_mac + arp_mac[sorc_ip]
-                IP_header = node2_ip + sorc_ip + protocol
-                packet = ethernet_header + IP_header + data_length + data
+                ethernet_header = node2_mac + "," + arp_mac[sorc_ip]
+                IP_header = node2_ip + "," + sorc_ip + "," +  protocol
+
+                payload = IP_header + "," + data_length + "," + data
+                payload_length = len(payload) - 4
+                packet = ethernet_header + "," + str(payload_length) + "," + payload
                 node2.send(bytes(packet, "utf-8"))
                 node3.send(bytes(packet, "utf-8"))
+            
             elif protocol == "1K":
                 print("EXIT")
                 # raise SystemExit
             # send new packet
             send_packet()
+
 send_packet()
 receive_packet()
 node2.close()
