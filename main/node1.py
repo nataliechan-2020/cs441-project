@@ -67,14 +67,14 @@ def receive_packet(received_msg):
             data = received_message[7]
 
         else:
-            sorc_mac = received_message[0]
-            dest_mac = received_message[1]
-            payload_length = received_message[2]
-            sorc_ip = received_message[3]
-            dest_ip =  received_message[4]
-            protocol = received_message[5]
-            data_length = received_message[6]
-            data = received_message[7]
+            sorc_mac = received_msg[0]
+            dest_mac = received_msg[1]
+            payload_length = received_msg[2]
+            sorc_ip = received_msg[3]
+            dest_ip =  received_msg[4]
+            protocol = received_msg[5]
+            data_length = received_msg[6]
+            data = received_msg[7]
 
         if dest_mac != node1_mac:
             print("\nPACKET DROPPED")
