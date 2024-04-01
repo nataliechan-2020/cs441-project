@@ -49,7 +49,7 @@ def send_packet():
 
 
 def receive_packet(received_msg):
-    print(received_msg)
+    # print(received_msg)
     while True:
         # Receive data from router
         if received_msg== "":
@@ -76,6 +76,9 @@ def receive_packet(received_msg):
             data_length = received_msg[6]
             data = received_msg[7]
 
+        protocol_flag = data[0]
+        data = data[1:]
+
         if dest_mac != node1_mac:
             print("\nPACKET DROPPED")
         elif dest_ip == node2_ip and sorc_ip ==node3_ip:
@@ -88,11 +91,12 @@ def receive_packet(received_msg):
             print("Source IP address: {sorc_ip} \nDestination IP address: {dest_ip}".format(sorc_ip=sorc_ip, dest_ip=dest_ip))
             print("Protocol: " + protocol)
             print("Data length: " + data_length)
+            print("Protocol flag:", protocol_flag)
             print("Data: " + data)
 
             # ping reply, unicast -> reply to router and node3
-            if protocol == "0P":
-                protocol = "0R"
+            if protocol == "0" and protocol_flag == "P":
+                data = "R" + data
                 ethernet_header = node1_mac + "," + router_mac
                 IP_header = node1_ip + "," + sorc_ip + "," + protocol
 
@@ -103,7 +107,7 @@ def receive_packet(received_msg):
                 
                 # print(packet)
                 node1.send(bytes(packet, "utf-8"))
-            elif protocol == "1K":
+            elif protocol == "1" and protocol_flag == "K":
                 print("EXIT")
             send_packet()  
 

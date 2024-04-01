@@ -59,6 +59,9 @@ def receive_packet():
         data_length = received_message[6]
         data = received_message[7]
 
+        protocol_flag = data[0]
+        data = data[1:]
+
         # drop packet
         if dest_mac != node2_mac:
             print("\nPACKET DROPPED")
@@ -70,6 +73,7 @@ def receive_packet():
             print("Source IP address: {sorc_ip} \nDestination IP address: {dest_ip}".format(sorc_ip=sorc_ip, dest_ip=dest_ip))
             print("Protocol: " + protocol)
             print("Data length: " + data_length)
+            print("Protocol flag:", protocol_flag)
             print("Data: " + data)
             sniffing_log(data, sorc_ip, dest_ip, 2)
         
@@ -79,6 +83,7 @@ def receive_packet():
             print("Source IP address: {sorc_ip} \nDestination IP address: {dest_ip}".format(sorc_ip=sorc_ip, dest_ip=dest_ip))
             print("Protocol: " + protocol)
             print("Data length: " + data_length)
+            print("Protocol flag:", protocol_flag)
             print("Data: " + data)
             sniffing_log(data, sorc_ip, dest_ip, 2)
         # Sniffing Attack END
@@ -89,11 +94,12 @@ def receive_packet():
             print("Source IP address: {sorc_ip} \nDestination IP address: {dest_ip}".format(sorc_ip=sorc_ip, dest_ip=dest_ip))
             print("Protocol: " + protocol)
             print("Data length: " + data_length)
+            print("Protocol flag:", protocol_flag)
             print("Data: " + data)
 
             # ping reply, unicast -> reply to router and node3
-            if protocol == "0P":
-                protocol = "0R"
+            if protocol == "0" and protocol_flag == "P":
+                data = "R" + data
                 ethernet_header = node2_mac + "," + arp_mac[sorc_ip]
                 IP_header = node2_ip + "," + sorc_ip + "," +  protocol
 
@@ -105,7 +111,7 @@ def receive_packet():
                 node2.send(bytes(packet, "utf-8"))
                 node3.send(bytes(packet, "utf-8"))
             
-            elif protocol == "1K":
+            elif protocol == "1" and protocol_flag == "K":
                 print("EXIT")
                 # raise SystemExit
             # send new packet

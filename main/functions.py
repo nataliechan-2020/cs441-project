@@ -2,7 +2,7 @@ from logs import flag_ip_spoofing, log
 
 def receive_router (received_message, node, compare, arp_mac):
     received_message = received_message.split(',')
-    print(received_message)
+    # print(received_message)
 
     sorc_mac = received_message[0]
     dest_mac = received_message[1]
@@ -34,20 +34,21 @@ def receive_router (received_message, node, compare, arp_mac):
         print("Source IP address:", sorc_ip, "\nDestination IP address:", dest_ip)
         print("Protocol:", protocol)
         print("Data length:", data_length)
-        print("Data:", data)
+        print("Protocol flag:", data[0])
+        print("Data:", data[1:])
     
     return sorc_mac, sorc_ip, payload_length, dest_mac, dest_ip, protocol, data_length, data, packet_dropped
 
 def send_node(node, ip1, ip2, current_ip, current_mac, router_mac, arp_mac, ethernet_header, IP_header):
     data = input("Enter data: ")
     data_length = len(data)
-    while data_length >= 10:
+    while data_length > 251:
         print("[ERROR] Data too large")
         data = input("Enter data: ")
         data_length = len(data)
 
     protocol = input("Enter protocol: ")
-    while protocol != "0P" and protocol != "1K":
+    while protocol != "0" and protocol != "1":
         print("[ERROR] Wrong protocol inputed")
         protocol = input("Enter protocol: ")
 
@@ -56,6 +57,12 @@ def send_node(node, ip1, ip2, current_ip, current_mac, router_mac, arp_mac, ethe
         print("[ERROR] Wrong destination IP inputed")
         dest_ip = input("Enter destination IP: ")
 
+    if protocol == "0":
+        data = "P" + data
+    else:
+        data = "K" + data
+
+    data_length = len(data)
     
     if node == 1:
         IP_header = IP_header + current_ip + "," + dest_ip + "," + protocol
@@ -79,7 +86,6 @@ def send_node(node, ip1, ip2, current_ip, current_mac, router_mac, arp_mac, ethe
 
     payload = IP_header + "," + str(data_length) + "," + data
     payload_length = len(payload) - 4
-
     packet = ethernet_header + "," + str(payload_length) + "," + payload
     
     return packet
