@@ -160,6 +160,7 @@ def receive_packet():
             data_length = received_message[6]
             data = received_message[7]
 
+        print(received_message)
         protocol_flag = data[0]
         data = data[1:]
 
