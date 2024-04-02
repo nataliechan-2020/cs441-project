@@ -134,10 +134,9 @@ def receive_packet():
         node3.settimeout(1)
         try:
             # receive from router
-            # received_message = ""
+            received_message = ""
             received_message = node3.recv(1024)
             received_message = received_message.decode("utf-8")
-            print(received_message)
 
             received_message = received_message.split(',')
 
@@ -150,10 +149,9 @@ def receive_packet():
             data_length = received_message[6]
             data = received_message[7]
         except TimeoutError:
-            # received_message = ""
+            received_message = ""
             received_message = intra3.recv(1024)
             received_message = received_message.decode("utf-8")
-            print(received_message)
             received_message = received_message.split(',')
 
             sorc_mac = received_message[0]
@@ -166,7 +164,7 @@ def receive_packet():
             data = received_message[7]
 
         protocol_flag = data[0]
-        data = data[1:]
+        data = data[1:len(data)-2]
 
         if sorc_ip in blocked_ips and sorc_ip!=node3_ip:
             print("FIREWALL BLOCKED")
