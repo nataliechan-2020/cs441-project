@@ -34,10 +34,10 @@ node3_ip = "0x2B"
 
 arp_mac = {node1_ip : router_mac, node3_ip : node3_mac}
 
-def receive_packet():
+def receive_packet(node):
     while True:
         # receive from router
-        received_message = node2.recv(1024)
+        received_message = node.recv(1024)
         received_message = received_message.decode("utf-8")
         received_message = received_message.split(',')
 
@@ -108,8 +108,10 @@ def receive_packet():
             # send new packet
             # send_packet()
 
-receive_thread = threading.Thread(target=receive_packet)
-receive_thread.start()
+receive_from_node2_thread = threading.Thread(target=receive_packet, args=(node2,))
+receive_from_node3_thread = threading.Thread(target=receive_packet, args=(node3,))
+receive_from_node2_thread.start()
+receive_from_node3_thread.start()
 
 # def send_packet():
 while True:
