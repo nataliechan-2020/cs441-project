@@ -92,16 +92,23 @@ def from_node3(node3, arp_socket, node1_ip, router1_mac):
 router1 = socket.socket()
 router1.bind(("localhost", 1200))
 router1.listen(2)
+print("Waiting for Node1 to connect...")
 node1, _ = router1.accept()
+print("Node1 connected.")
 
 # Socket (network 2)
 router2 = socket.socket()
 router2.bind(("localhost", 2200))
 router2.listen(4)
+print("Waiting for Node2 to connect...")
 node2, _ = router2.accept()
+print("Node2 connected.")
+print("Waiting for Node3 to connect...")
 node3, _ = router2.accept()
+print("Node3 connected.")
 
-print("CONNECTED")
+
+print("ALL NODES CONNECTED")
 
 # arp table
 node1_mac = "N1"

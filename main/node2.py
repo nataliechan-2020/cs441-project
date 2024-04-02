@@ -1,5 +1,6 @@
 import socket
 import time
+import threading
 from functions import send_node
 from logs import sniffing_log
 
@@ -32,16 +33,6 @@ node1_ip = "0x1A"
 node3_ip = "0x2B"
 
 arp_mac = {node1_ip : router_mac, node3_ip : node3_mac}
-
-def send_packet():
-    print("\nOUTGOING PACKET:")
-    ethernet_header = ""
-    IP_header = ""
-
-    packet = send_node(2, node1_ip, node3_ip, node2_ip, node2_mac, None, arp_mac, ethernet_header, IP_header)
-    node2.send(bytes(packet, "utf-8"))
-    node3.send(bytes(packet, "utf-8"))
-
 
 def receive_packet():
     while True:
@@ -115,8 +106,24 @@ def receive_packet():
                 print("EXIT")
                 # raise SystemExit
             # send new packet
-            send_packet()
+            # send_packet()
 
-send_packet()
-receive_packet()
-node2.close()
+receive_thread = threading.Thread(target=receive_packet)
+receive_thread.start()
+
+# def send_packet():
+while True:
+    print("\nOUTGOING PACKET:")
+    ethernet_header = ""
+    IP_header = ""
+
+    packet = send_node(2, node1_ip, node3_ip, node2_ip, node2_mac, None, arp_mac, ethernet_header, IP_header)
+    node2.send(bytes(packet, "utf-8")) # goes to router
+    node3.send(bytes(packet, "utf-8")) # goes to node3 (cos its sent to all nodes in the network)
+
+
+
+
+# send_packet()
+# receive_packet()
+# node2.close()

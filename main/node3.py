@@ -1,5 +1,6 @@
 import socket
 import time
+import threading
 from functions import send_node
 from logs import log_ip, log_protocol, sniffing_log, blocked_data
 
@@ -26,8 +27,10 @@ node2_mac = "N2"
 node1_ip = "0x1A"
 node2_ip = "0x2A"
 
+# next hop
 arp_mac = {node1_ip : router_mac, node2_ip : node2_mac, node3_ip: node3_mac}
 
+# firewall
 blocked_ips = []
 blocked_protocol = []
 ips = ""
@@ -37,14 +40,12 @@ for i in blocked_ips:
 for i in blocked_protocol:
     protocols+= ", "  + i
 
-log_ip(ips, "initial")
-
 def add_blocked_ip(ip):
     blocked_ips.append(ip)
     print("ADDED")
     print(blocked_ips)
     log_ip(ip, "add")
-    main()
+    # main()
 
 def remove_blocked_ip(ip):
     if ip in blocked_ips:
@@ -55,14 +56,14 @@ def remove_blocked_ip(ip):
     else:
         print("NOT FOUND")
         print(blocked_ips)
-    main()
+    # main()
 
 def add_blocked_protocol(protocol):
     blocked_protocol.append(protocol)
     print("ADDED")
     print(blocked_protocol)
     log_protocol(protocol, "add")
-    main()
+    # main()
 
 def remove_blocked_protocol(protocol):
     if protocol in blocked_protocol:
@@ -73,67 +74,13 @@ def remove_blocked_protocol(protocol):
     else:
         print("NOT FOUND")
         print(blocked_protocol)
-    main()
+    # main()
 
-
-def main ():
-    option = input("Choose 1, 2, 3, 4 or 5: "  + 
-                   "\n1) Add Blocked IP to Firewall" + 
-                   "\n2) Remove Blocked IP from Firewall" +
-                   "\n3) Add Blocked Protocol to Firewall" + 
-                   "\n4) Remove Blocked Protocol From Firewall" +
-                    "\n5) Send/Receive Packet: \n")
-    while int(option) not in [1,2,3, 4, 5]:
-        option = input("Choose 1, 2, 3, 4 or 5:" + 
-                       "\n1) Add Blocked IP to Firewall" + 
-                       "\n2) Remove Blocked IP from Firewall" +
-                       "\n3) Add Blocked Protocol to Firewall" + 
-                        "\n4) Remove Blocked Protocol From Firewall" + 
-                        "\n5) Send/Receive Packet: \n")
-    option = int(option)
-
-    if option == 1:
-        ip = input("Enter IP Address: ")
-        while ip != node1_ip and ip != node2_ip:
-            ip = input("Enter IP Address:")
-        add_blocked_ip(ip)
-        
-    elif option == 2:
-        ip = input("Enter IP Address: ")
-        while ip != node1_ip and ip != node2_ip:
-            ip = input("Enter IP Address:")
-        remove_blocked_ip(ip)
-    elif option == 3:
-        protocol = input("Enter Protocol: ")
-        while protocol != "0" and protocol!="1":
-            protocol = input("Enter Protocol:")
-        add_blocked_protocol(protocol)
-    elif option == 4:
-        protocol = input("Enter Protocol: ")
-        while protocol != "0" and protocol!="1":
-            protocol = input("Enter Protocol:")
-        remove_blocked_protocol(protocol)
-
-    else:
-        send_packet()
-        receive_packet()   
-
-
-def send_packet():
-    print("\nOUTGOING PACKET:")
-    ethernet_header = ""
-    IP_header = ""
-    packet = send_node(3, node1_ip, node2_ip, node3_ip, node3_mac, None, arp_mac, ethernet_header, IP_header)
-    node3.send(bytes(packet, "utf-8"))
-    intra3.send(bytes(packet, "utf-8"))
-    receive_packet()
-
-
-def receive_packet():      
+def receive_packet():
     while True:
-        node3.settimeout(1)
+        # node3.settimeout(1)
+        # receive from router
         try:
-            # receive from router
             received_message = ""
             received_message = node3.recv(1024)
             received_message = received_message.decode("utf-8")
@@ -148,7 +95,8 @@ def receive_packet():
             protocol = received_message[5]
             data_length = received_message[6]
             data = received_message[7]
-        except TimeoutError:
+        # receive from node2
+        except TimeoutError: 
             received_message = ""
             received_message = intra3.recv(1024)
             received_message = received_message.decode("utf-8")
@@ -209,7 +157,7 @@ def receive_packet():
 
             elif protocol == "1" and protocol_flag == "K":
                 print("EXIT")
-            send_packet() 
+            # send_packet() 
        
         # receive from node2
         received_message = intra3.recv(1024)
@@ -236,7 +184,7 @@ def receive_packet():
         elif protocol in blocked_protocol and sorc_ip!=node3_ip:
             print("FIREWALL BLOCKED")
             continue
-        # drop packet
+        # drop packet when not the intended receiver
         elif dest_mac != node3_mac and sorc_ip!=node3_ip:
             print("\nPACKET DROPPED")
         else:
@@ -263,7 +211,69 @@ def receive_packet():
                 intra3.send(bytes(packet, "utf-8")) 
             elif protocol == "1" and protocol_flag == "K":
                 print("EXIT")
-            send_packet() 
+            # send_packet() 
 
-main()
-node3.close()
+# logs
+log_ip(ips, "initial")
+
+receive_thread = threading.Thread(target=receive_packet)
+receive_thread.start()
+
+# def main ():
+while True:
+    option = input("Choose 1, 2, 3, 4 or 5: "  + 
+                   "\n1) Add Blocked IP to Firewall" + 
+                   "\n2) Remove Blocked IP from Firewall" +
+                   "\n3) Add Blocked Protocol to Firewall" + 
+                   "\n4) Remove Blocked Protocol From Firewall" +
+                    "\n5) Send/Receive Packet: \n")
+    while int(option) not in [1,2,3, 4, 5]:
+        option = input("Choose 1, 2, 3, 4 or 5:" + 
+                       "\n1) Add Blocked IP to Firewall" + 
+                       "\n2) Remove Blocked IP from Firewall" +
+                       "\n3) Add Blocked Protocol to Firewall" + 
+                        "\n4) Remove Blocked Protocol From Firewall" + 
+                        "\n5) Send/Receive Packet: \n")
+    option = int(option)
+
+    if option == 1:
+        ip = input("Enter IP Address: ")
+        while ip != node1_ip and ip != node2_ip:
+            ip = input("Enter IP Address:")
+        add_blocked_ip(ip)
+        
+    elif option == 2:
+        ip = input("Enter IP Address: ")
+        while ip != node1_ip and ip != node2_ip:
+            ip = input("Enter IP Address:")
+        remove_blocked_ip(ip)
+    elif option == 3:
+        protocol = input("Enter Protocol: ")
+        while protocol != "0" and protocol!="1":
+            protocol = input("Enter Protocol:")
+        add_blocked_protocol(protocol)
+    elif option == 4:
+        protocol = input("Enter Protocol: ")
+        while protocol != "0" and protocol!="1":
+            protocol = input("Enter Protocol:")
+        remove_blocked_protocol(protocol)
+    else:
+    # else:
+    #     send_packet()
+    #     receive_packet()   
+
+
+# def send_packet():
+        print("\nOUTGOING PACKET:")
+        ethernet_header = ""
+        IP_header = ""
+        packet = send_node(3, node1_ip, node2_ip, node3_ip, node3_mac, None, arp_mac, ethernet_header, IP_header)
+        node3.send(bytes(packet, "utf-8"))
+        intra3.send(bytes(packet, "utf-8"))
+        # receive_packet()
+
+
+
+
+# main()
+# node3.close()
