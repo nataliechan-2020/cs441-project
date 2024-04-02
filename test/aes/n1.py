@@ -28,6 +28,7 @@ def decrypt(ciphertext, key):
     return plaintext
 
 key = str.encode("1234567812345678")
+# key = get_random_bytes(16) 
 
 router_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 router_socket.connect(('localhost', 8000))
