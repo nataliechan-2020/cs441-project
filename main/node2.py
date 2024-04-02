@@ -98,7 +98,7 @@ def receive_packet():
                 payload_length = len(payload) - 4
                 packet = ethernet_header + "," + str(payload_length) + "," + payload
                 
-                print(packet)
+                # print(packet)
                 node2.send(bytes(packet, "utf-8"))
                 node3.send(bytes(packet, "utf-8"))
             

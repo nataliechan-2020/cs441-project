@@ -76,43 +76,41 @@ def remove_blocked_protocol(protocol):
         print(blocked_protocol)
     # main()
 
-def receive_packet():
+def receive_packet(node):
     while True:
         # node3.settimeout(1)
         # receive from router
-        try:
-            received_message = ""
-            received_message = node3.recv(1024)
-            received_message = received_message.decode("utf-8")
+        # try:
+        received_message = node.recv(1024)
+        received_message = received_message.decode("utf-8")
+        received_message = received_message.split(',')
 
-            received_message = received_message.split(',')
-
-            sorc_mac = received_message[0]
-            dest_mac = received_message[1]
-            payload_length = received_message[2]
-            sorc_ip = received_message[3]
-            dest_ip =  received_message[4]
-            protocol = received_message[5]
-            data_length = received_message[6]
-            data = received_message[7]
+        sorc_mac = received_message[0]
+        dest_mac = received_message[1]
+        payload_length = received_message[2]
+        sorc_ip = received_message[3]
+        dest_ip =  received_message[4]
+        protocol = received_message[5]
+        data_length = received_message[6]
+        data = received_message[7]
         # receive from node2
-        except TimeoutError: 
-            received_message = ""
-            received_message = intra3.recv(1024)
-            received_message = received_message.decode("utf-8")
-            received_message = received_message.split(',')
+        # except TimeoutError: 
+        #     received_message = intra3.recv(1024)
+        #     received_message = received_message.decode("utf-8")
+        #     received_message = received_message.split(',')
 
-            sorc_mac = received_message[0]
-            dest_mac = received_message[1]
-            payload_length = received_message[2]
-            sorc_ip = received_message[3]
-            dest_ip =  received_message[4]
-            protocol = received_message[5]
-            data_length = received_message[6]
-            data = received_message[7]
+        #     sorc_mac = received_message[0]
+        #     dest_mac = received_message[1]
+        #     payload_length = received_message[2]
+        #     sorc_ip = received_message[3]
+        #     dest_ip =  received_message[4]
+        #     protocol = received_message[5]
+        #     data_length = received_message[6]
+        #     data = received_message[7]
 
         protocol_flag = data[0]
-        data = data[1:len(data)-2]
+        # data = data[1:len(data)-2]
+        data = data[1:]
 
         if sorc_ip in blocked_ips and sorc_ip!=node3_ip:
             print("FIREWALL BLOCKED")
@@ -160,64 +158,66 @@ def receive_packet():
             # send_packet() 
        
         # receive from node2
-        received_message = intra3.recv(1024)
-        received_message = received_message.decode("utf-8")
-        received_message = received_message.split(',')
+        # received_message = intra3.recv(1024)
+        # received_message = received_message.decode("utf-8")
+        # received_message = received_message.split(',')
 
-        sorc_mac = received_message[0]
-        dest_mac = received_message[1]
-        payload_length = received_message[2]
-        sorc_ip = received_message[3]
-        dest_ip =  received_message[4]
-        protocol = received_message[5]
-        data_length = received_message[6]
-        data = received_message[7]
+        # sorc_mac = received_message[0]
+        # dest_mac = received_message[1]
+        # payload_length = received_message[2]
+        # sorc_ip = received_message[3]
+        # dest_ip =  received_message[4]
+        # protocol = received_message[5]
+        # data_length = received_message[6]
+        # data = received_message[7]
 
-        protocol_flag = data[0]
-        data = data[1:]
+        # protocol_flag = data[0]
+        # data = data[1:]
 
-        print("----")
-        if sorc_ip in blocked_ips and sorc_ip!=node3_ip:
-            print("FIREWALL BLOCKED")
-            continue
+        # print("----")
+        # if sorc_ip in blocked_ips and sorc_ip!=node3_ip:
+        #     print("FIREWALL BLOCKED")
+        #     continue
         
-        elif protocol in blocked_protocol and sorc_ip!=node3_ip:
-            print("FIREWALL BLOCKED")
-            continue
-        # drop packet when not the intended receiver
-        elif dest_mac != node3_mac and sorc_ip!=node3_ip:
-            print("\nPACKET DROPPED")
-        else:
-            if sorc_ip =="0x2B" or dest_ip == "0x2B":
-                print("\nINCOMING PACKET:")
-                print("Source MAC address: {sorc_mac} \nDestination MAC address: {dest_mac}".format(sorc_mac=sorc_mac, dest_mac=dest_mac))
-                print("Source IP address: {sorc_ip} \nDestination IP address: {dest_ip}".format(sorc_ip=sorc_ip, dest_ip=dest_ip))
-                print("Protocol: " + protocol)
-                print("Data length: " + data_length)
-                print("Protocol flag:", protocol_flag)
-                print("Data: " + data)
+        # elif protocol in blocked_protocol and sorc_ip!=node3_ip:
+        #     print("FIREWALL BLOCKED")
+        #     continue
+        # # drop packet when not the intended receiver
+        # elif dest_mac != node3_mac and sorc_ip!=node3_ip:
+        #     print("\nPACKET DROPPED")
+        # else:
+        #     if sorc_ip =="0x2B" or dest_ip == "0x2B":
+        #         print("\nINCOMING PACKET:")
+        #         print("Source MAC address: {sorc_mac} \nDestination MAC address: {dest_mac}".format(sorc_mac=sorc_mac, dest_mac=dest_mac))
+        #         print("Source IP address: {sorc_ip} \nDestination IP address: {dest_ip}".format(sorc_ip=sorc_ip, dest_ip=dest_ip))
+        #         print("Protocol: " + protocol)
+        #         print("Data length: " + data_length)
+        #         print("Protocol flag:", protocol_flag)
+        #         print("Data: " + data)
 
-            # ping reply, unicast -> reply to router and node2
-            if protocol == "0" and protocol_flag == "P":
-                data = "R" + data
-                ethernet_header = node3_mac + "," + arp_mac[sorc_ip]
-                IP_header = node3_ip + "," + sorc_ip + "," + protocol
+        #     # ping reply, unicast -> reply to router and node2
+        #     if protocol == "0" and protocol_flag == "P":
+        #         data = "R" + data
+        #         ethernet_header = node3_mac + "," + arp_mac[sorc_ip]
+        #         IP_header = node3_ip + "," + sorc_ip + "," + protocol
 
-                payload = IP_header + "," + data_length + "," + data
-                payload_length = len(payload) - 4
-                packet = ethernet_header + "," + str(payload_length) + "," + payload
+        #         payload = IP_header + "," + data_length + "," + data
+        #         payload_length = len(payload) - 4
+        #         packet = ethernet_header + "," + str(payload_length) + "," + payload
 
-                node3.send(bytes(packet, "utf-8"))
-                intra3.send(bytes(packet, "utf-8")) 
-            elif protocol == "1" and protocol_flag == "K":
-                print("EXIT")
-            # send_packet() 
+        #         node3.send(bytes(packet, "utf-8"))
+        #         intra3.send(bytes(packet, "utf-8")) 
+        #     elif protocol == "1" and protocol_flag == "K":
+        #         print("EXIT")
+        #     # send_packet() 
 
 # logs
 log_ip(ips, "initial")
 
-receive_thread = threading.Thread(target=receive_packet)
-receive_thread.start()
+receive_from_node3_thread = threading.Thread(target=receive_packet, args=(node3,))
+receive_from_intra3_thread = threading.Thread(target=receive_packet, args=(intra3,))
+receive_from_node3_thread.start()
+receive_from_intra3_thread.start()
 
 # def main ():
 while True:
@@ -241,7 +241,6 @@ while True:
         while ip != node1_ip and ip != node2_ip:
             ip = input("Enter IP Address:")
         add_blocked_ip(ip)
-        
     elif option == 2:
         ip = input("Enter IP Address: ")
         while ip != node1_ip and ip != node2_ip:
@@ -258,12 +257,9 @@ while True:
             protocol = input("Enter Protocol:")
         remove_blocked_protocol(protocol)
     else:
-    # else:
     #     send_packet()
     #     receive_packet()   
-
-
-# def send_packet():
+    # def send_packet():
         print("\nOUTGOING PACKET:")
         ethernet_header = ""
         IP_header = ""
@@ -271,9 +267,6 @@ while True:
         node3.send(bytes(packet, "utf-8"))
         intra3.send(bytes(packet, "utf-8"))
         # receive_packet()
-
-
-
 
 # main()
 # node3.close()
