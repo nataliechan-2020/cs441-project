@@ -125,11 +125,13 @@ def receive_packet(node):
         # drop packet
         elif dest_mac != node3_mac and sorc_ip!=node3_ip:
             print("\nPACKET DROPPED")
+        # sniff
         elif dest_ip == node2_ip and sorc_ip ==node1_ip:
             sniffing_log(data, sorc_ip, dest_ip, 3)
         elif dest_ip == node1_ip and sorc_ip == node2_ip:
             sniffing_log(data, sorc_ip, dest_ip, 3)
 
+        # return message
         else:
             print(sorc_ip)
             if sorc_ip =="0x2B" or dest_ip == "0x2B":
