@@ -19,8 +19,16 @@ def decrypt(ciphertext, key):
     plaintext = unpad(padded_plaintext, AES.block_size)
     return plaintext
 
-key = str.encode("1234567812345678")
-# key = get_random_bytes(16) 
+def save_key(key):
+    with open("key.bin", "wb") as key_file:
+        key_file.write(key)
+
+def load_key():
+    with open("key.bin", "rb") as key_file:
+        return key_file.read()
+    
+# key = str.encode("1234567812345678")
+
 
 def receive_router (received_message, node, compare, arp_mac):
     received_message = received_message.split(',')
@@ -62,6 +70,7 @@ def receive_router (received_message, node, compare, arp_mac):
     return sorc_mac, sorc_ip, payload_length, dest_mac, dest_ip, protocol, data_length, data, packet_dropped
 
 def send_node(node, ip1, ip2, current_ip, current_mac, router_mac, arp_mac, ethernet_header, IP_header):
+    
     data = input("Enter data: ")
     data_length = len(data)
     while data_length > 251:
@@ -85,7 +94,10 @@ def send_node(node, ip1, ip2, current_ip, current_mac, router_mac, arp_mac, ethe
         data = "K" + data
 
     data_length = len(data)
-    
+
+    key = load_key()
+   
+
     if node == 1:
         IP_header = IP_header + current_ip + "," + dest_ip + "," + protocol
         ethernet_header = ethernet_header + current_mac + "," + router_mac

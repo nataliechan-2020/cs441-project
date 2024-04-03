@@ -1,7 +1,7 @@
 import socket
 import time
 import threading
-from functions import send_node, decrypt
+from functions import send_node, decrypt, load_key
 from logs import sniffing_log
 
 
@@ -21,13 +21,17 @@ node1.connect(router)
 router_mac = "R1"
 node2_ip = "0x2A"
 node3_ip = "0x2B"
-key = str.encode("1234567812345678")
+# key = str.encode("1234567812345678")
 # key = get_random_bytes(16) 
+
 
 
 
 def receive_packet():
     # print(received_msg)
+    key = load_key()
+    # print("PRINTING")
+    # print(key)
     while True:
         # Receive data from router
         # if received_msg== "": 

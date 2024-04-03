@@ -1,7 +1,7 @@
 import socket
 import time
 import threading
-from functions import send_node, decrypt
+from functions import send_node, decrypt, load_key
 from logs import log_ip, log_protocol, sniffing_log, blocked_data
 
 # initialise IP and MAC addresses
@@ -27,8 +27,10 @@ node2_mac = "N2"
 node1_ip = "0x1A"
 node2_ip = "0x2A"
 
-key = str.encode("1234567812345678")
+# key = str.encode("1234567812345678")
 # key = get_random_bytes(16) 
+key = load_key()
+
 
 # next hop
 arp_mac = {node1_ip : router_mac, node2_ip : node2_mac, node3_ip: node3_mac}

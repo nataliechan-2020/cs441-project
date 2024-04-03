@@ -1,8 +1,11 @@
 import socket
 import threading
-from functions import receive_router
+from functions import receive_router, save_key
 from logs import clear_log, create_logfile
-
+import base64
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
+from Crypto.Random import get_random_bytes
 # Initialise IP and MAC addresses
 router1_ip = "0x11"
 router1_mac = "R1"
@@ -11,6 +14,8 @@ router2_mac = "R2"
 
 create_logfile()
 clear_log()
+key = get_random_bytes(16) 
+save_key(key)
 
 # Rate Limiting
 def initialize_counter():

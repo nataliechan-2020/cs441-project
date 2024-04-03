@@ -1,7 +1,7 @@
 import socket
 import time
 import threading
-from functions import send_node, decrypt
+from functions import send_node, decrypt, load_key
 from logs import sniffing_log
 
 # Initialise IP and MAC addresses
@@ -33,10 +33,13 @@ node1_ip = "0x1A"
 node3_ip = "0x2B"
 
 arp_mac = {node1_ip : router_mac, node3_ip : node3_mac}
-key = str.encode("1234567812345678")
+# key = str.encode("1234567812345678")
 # key = get_random_bytes(16) 
+
 def receive_packet(node):
+    
     while True:
+        key = load_key()
         # receive from router
         received_message = node.recv(1024)
         received_message = received_message.decode("utf-8")
