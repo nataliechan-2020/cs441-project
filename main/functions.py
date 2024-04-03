@@ -5,6 +5,17 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 from Crypto.Random import get_random_bytes
 
+# SETTINGS FUNCTIONS
+def settings():
+    option = input("\nChoose 1, 2, 3, 4 or 5: "  + 
+                   "\n1) Add Blocked IP to Firewall" + 
+                   "\n2) Remove Blocked IP from Firewall" +
+                   "\n3) Add Blocked Protocol to Firewall" + 
+                   "\n4) Remove Blocked Protocol From Firewall" +
+                   "\n5) Send/Receive Packet: \n")
+    return option
+
+# AES FUNCTIONS
 def encrypt(plaintext, key):
     cipher = AES.new(key, AES.MODE_ECB)
     padtext = pad(plaintext, AES.block_size)
@@ -29,28 +40,38 @@ def load_key():
     
 # key = str.encode("1234567812345678")
 
-
-def receive_router (received_message, node, compare, arp_mac):
+# PACKET FUNCTIONS
+def split_packet(received_message):
     received_message = received_message.split(',')
-    # print(received_message)
-
     sorc_mac = received_message[0]
     dest_mac = received_message[1]
     payload_length = received_message[2]
     sorc_ip = received_message[3]
-    dest_ip = received_message[4]
+    dest_ip =  received_message[4]
     protocol = received_message[5]
     data_length = received_message[6]
     data = received_message[7]
+    return sorc_mac, sorc_ip, payload_length, dest_mac, dest_ip, protocol, data_length, data
+
+def details(sorc_mac, sorc_ip, dest_mac, dest_ip, protocol, data_length, protocol_flag, data):
+    print("Source MAC address: {sorc_mac} \nDestination MAC address: {dest_mac}".format(sorc_mac=sorc_mac, dest_mac=dest_mac))
+    print("Source IP address: {sorc_ip} \nDestination IP address: {dest_ip}".format(sorc_ip=sorc_ip, dest_ip=dest_ip))
+    print("Protocol: " + protocol)
+    print("Data length: " + data_length)
+    print("Protocol flag:", protocol_flag)
+    print("Data: " + data)
+
+def receive_router (received_message, node, compare, arp_mac):
+    sorc_mac, sorc_ip, payload_length, dest_mac, dest_ip, protocol, data_length, data = split_packet(received_message)
 
     packet_dropped = False
     if node == 2:
         if dest_mac != compare:
-            print("\n PACKET DROPPED")
+            print("PACKET DROPPED")
             packet_dropped = True
     elif node ==3:
         if dest_ip != compare:
-            print("\n PACKET DROPPED")
+            print("PACKET DROPPED")
             packet_dropped = True 
     if packet_dropped == False:
         if (arp_mac[sorc_ip] != sorc_mac):
@@ -94,15 +115,13 @@ def send_node(node, ip1, ip2, current_ip, current_mac, router_mac, arp_mac, ethe
         data = "K" + data
 
     data_length = len(data)
-
     key = load_key()
-   
 
     if node == 1:
         IP_header = IP_header + current_ip + "," + dest_ip + "," + protocol
         ethernet_header = ethernet_header + current_mac + "," + router_mac
     elif node ==2:
-        print(ip1)
+        # print(ip1)
         # Spoofing START
         if dest_ip == ip1:
             spoofed_sorc_ip = ip2  
@@ -118,7 +137,7 @@ def send_node(node, ip1, ip2, current_ip, current_mac, router_mac, arp_mac, ethe
         IP_header = IP_header + current_ip + "," + dest_ip + "," + protocol
         ethernet_header = ethernet_header + current_mac + "," + arp_mac[dest_ip]
     
-    print(data)
+    # print(data)
     protocol = data[0]
     data= data[1:]
     data = data.encode()

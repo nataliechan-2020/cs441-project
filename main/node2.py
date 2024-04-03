@@ -1,7 +1,7 @@
 import socket
 import time
 import threading
-from functions import send_node, decrypt, load_key
+from functions import send_node, decrypt, load_key, split_packet, details
 from logs import sniffing_log
 
 # Initialise IP and MAC addresses
@@ -36,108 +36,138 @@ arp_mac = {node1_ip : router_mac, node3_ip : node3_mac}
 # key = str.encode("1234567812345678")
 # key = get_random_bytes(16) 
 
-def receive_packet(node):
-    
-    while True:
-        key = load_key()
-        # receive from router
-        received_message = node.recv(1024)
-        received_message = received_message.decode("utf-8")
-        received_message = received_message.split(',')
+# receive from router
+def from_router():
+    try:
+        while True:
+            key = load_key()
+            received_message = node2.recv(1024)
+            received_message = received_message.decode("utf-8")
+            sorc_mac, sorc_ip, payload_length, dest_mac, dest_ip, protocol, data_length, data = split_packet(received_message)
+            protocol_flag = data[0]
+            data = data[1:]
 
-        sorc_mac = received_message[0]
-        dest_mac = received_message[1]
-        payload_length = received_message[2]
-        sorc_ip = received_message[3]
-        dest_ip =  received_message[4]
-        protocol = received_message[5]
-        data_length = received_message[6]
-        data = received_message[7]
+            try:
+                # data = data.decode()
+                data = decrypt(data, key)
+                data = data.decode('utf-8')
+            except Exception as e:
+                print(data)
 
+            # drop packet
+            if dest_mac != node2_mac:
+                print("\nPACKET DROPPED")
+
+            # sniff
+            if dest_ip == node3_ip and sorc_ip == node1_ip and dest_mac!="N2":
+                print("\nINTERCEPTED PACKET:")
+                details(sorc_mac, sorc_ip, dest_mac, dest_ip, protocol, data_length, protocol_flag, data)
+                sniffing_log(data, sorc_ip, dest_ip, 2)
+            elif dest_ip == node1_ip and sorc_ip == node3_ip and dest_mac!="N2":
+                print("\nINTERCEPTED PACKET:")
+                details(sorc_mac, sorc_ip, dest_mac, dest_ip, protocol, data_length, protocol_flag, data)
+                sniffing_log(data, sorc_ip, dest_ip, 2)
         
-        protocol_flag = data[0]
-        data = data[1:]
+            else:
+                print("\nINCOMING PACKET:")
+                details(sorc_mac, sorc_ip, dest_mac, dest_ip, protocol, data_length, protocol_flag, data)
+                if protocol == "0" and protocol_flag == "P":
+                    data = "R" + data
+                    ethernet_header = node2_mac + "," + arp_mac[sorc_ip]
+                    IP_header = node2_ip + "," + sorc_ip + "," +  protocol
 
-        try:
-            # data = data.decode()
-            data = decrypt(data, key)
-            data = data.decode('utf-8')
-        except Exception as e:
-            print(data)
+                    payload = IP_header + "," + data_length + "," + data
+                    payload_length = len(payload) - 4
+                    packet = ethernet_header + "," + str(payload_length) + "," + payload
+                    
+                    node2.send(bytes(packet, "utf-8")) # to router
+                    try:
+                        node3.send(bytes(packet, "utf-8")) # to node 3, if connected
+                    except Exception as e:
+                        print("NODE 3 NOT FOUND")
 
-        # drop packet
-        if dest_mac != node2_mac:
-            print("\nPACKET DROPPED")
+                elif protocol == "1" and protocol_flag == "K":
+                    print("\nEXIT")
+                    node2.close()
+                    try:
+                        node3.close()
+                    except Exception as e:
+                        print("NODE 3 NOT FOUND")
 
-        # Sniffing Attack START
-        if dest_ip == node3_ip and sorc_ip == node1_ip and dest_mac!="N2":
-            print("\nINTERCEPTED PACKET:")
-            print("Source MAC address: {sorc_mac} \nDestination MAC address: {dest_mac}".format(sorc_mac=sorc_mac, dest_mac=dest_mac))
-            print("Source IP address: {sorc_ip} \nDestination IP address: {dest_ip}".format(sorc_ip=sorc_ip, dest_ip=dest_ip))
-            print("Protocol: " + protocol)
-            print("Data length: " + data_length)
-            print("Protocol flag:", protocol_flag)
-            print("Data: " + data)
-            sniffing_log(data, sorc_ip, dest_ip, 2)
+    except Exception as e:
+        print("NODE 2 EXITED")
+
+# receive from node3
+def from_node3():
+    try:
+        while True:
+            key = load_key()
+            received_message = node3.recv(1024)
+            received_message = received_message.decode("utf-8")
+            sorc_mac, sorc_ip, payload_length, dest_mac, dest_ip, protocol, data_length, data = split_packet(received_message)
+            protocol_flag = data[0]
+            data = data[1:]
+
+            try:
+                # data = data.decode()
+                data = decrypt(data, key)
+                data = data.decode('utf-8')
+            except Exception as e:
+                print(data)
+
+            # drop packet
+            if dest_mac != node2_mac:
+                print("\nPACKET DROPPED")
+
+            # sniffing attack
+            if dest_ip == node3_ip and sorc_ip == node1_ip and dest_mac!="N2":
+                print("\nINTERCEPTED PACKET:")
+                details(sorc_mac, sorc_ip, dest_mac, dest_ip, protocol, data_length, protocol_flag, data)
+                sniffing_log(data, sorc_ip, dest_ip, 2)
+            elif dest_ip == node1_ip and sorc_ip == node3_ip and dest_mac!="N2":
+                print("\nINTERCEPTED PACKET:")
+                details(sorc_mac, sorc_ip, dest_mac, dest_ip, protocol, data_length, protocol_flag, data)
+                sniffing_log(data, sorc_ip, dest_ip, 2)
         
-        elif dest_ip == node1_ip and sorc_ip == node3_ip and dest_mac!="N2":
-            print("\nINTERCEPTED PACKET:")
-            print("Source MAC address: {sorc_mac} \nDestination MAC address: {dest_mac}".format(sorc_mac=sorc_mac, dest_mac=dest_mac))
-            print("Source IP address: {sorc_ip} \nDestination IP address: {dest_ip}".format(sorc_ip=sorc_ip, dest_ip=dest_ip))
-            print("Protocol: " + protocol)
-            print("Data length: " + data_length)
-            print("Protocol flag:", protocol_flag)
-            print("Data: " + data)
-            sniffing_log(data, sorc_ip, dest_ip, 2)
-        # Sniffing Attack END
-       
-        else:
-            print("\nINCOMING PACKET:")
-            print("Source MAC address: {sorc_mac} \nDestination MAC address: {dest_mac}".format(sorc_mac=sorc_mac, dest_mac=dest_mac))
-            print("Source IP address: {sorc_ip} \nDestination IP address: {dest_ip}".format(sorc_ip=sorc_ip, dest_ip=dest_ip))
-            print("Protocol: " + protocol)
-            print("Data length: " + data_length)
-            print("Protocol flag:", protocol_flag)
-            print("Data: " + data)
+            else:
+                print("\nINCOMING PACKET:")
+                details(sorc_mac, sorc_ip, dest_mac, dest_ip, protocol, data_length, protocol_flag, data)
+                if protocol == "0" and protocol_flag == "P":
+                    data = "R" + data
+                    ethernet_header = node2_mac + "," + arp_mac[sorc_ip]
+                    IP_header = node2_ip + "," + sorc_ip + "," +  protocol
 
-            # ping reply, unicast -> reply to router and node3
-            if protocol == "0" and protocol_flag == "P":
-                data = "R" + data
-                ethernet_header = node2_mac + "," + arp_mac[sorc_ip]
-                IP_header = node2_ip + "," + sorc_ip + "," +  protocol
-
-                payload = IP_header + "," + data_length + "," + data
-                payload_length = len(payload) - 4
-                packet = ethernet_header + "," + str(payload_length) + "," + payload
+                    payload = IP_header + "," + data_length + "," + data
+                    payload_length = len(payload) - 4
+                    packet = ethernet_header + "," + str(payload_length) + "," + payload
+                    
+                    node3.send(bytes(packet, "utf-8"))
+                    node2.send(bytes(packet, "utf-8"))
                 
-                # print(packet)
-                node2.send(bytes(packet, "utf-8"))
-                node3.send(bytes(packet, "utf-8"))
-            
-            elif protocol == "1" and protocol_flag == "K":
-                print("EXIT")
-                # raise SystemExit
-            # send new packet
-            # send_packet()
+                elif protocol == "1" and protocol_flag == "K":
+                    print("\nEXIT")
+                    node2.close()
+                    node3.close()
 
-receive_from_node2_thread = threading.Thread(target=receive_packet, args=(node2,))
-receive_from_node3_thread = threading.Thread(target=receive_packet, args=(node3,))
-receive_from_node2_thread.start()
+    except Exception as e:
+        print("NODE 3 NOT FOUND")
+
+receive_from_router_thread = threading.Thread(target=from_router)
+receive_from_node3_thread = threading.Thread(target=from_node3)
+receive_from_router_thread.start()
 receive_from_node3_thread.start()
 
-# def send_packet():
 while True:
-    print("\nOUTGOING PACKET:")
-    ethernet_header = ""
-    IP_header = ""
+    try: 
+        print("\nOUTGOING PACKET:")
+        ethernet_header = ""
+        IP_header = ""
+        packet = send_node(2, node1_ip, node3_ip, node2_ip, node2_mac, None, arp_mac, ethernet_header, IP_header)
+        node2.send(bytes(packet, "utf-8")) # goes to router
+        try:
+            node3.send(bytes(packet, "utf-8")) # goes to node3 (cos its sent to all nodes in the network)
+        except Exception as e:
+            print("NODE 3 NOT FOUND")
 
-    packet = send_node(2, node1_ip, node3_ip, node2_ip, node2_mac, None, arp_mac, ethernet_header, IP_header)
-    node2.send(bytes(packet, "utf-8")) # goes to router
-    node3.send(bytes(packet, "utf-8")) # goes to node3 (cos its sent to all nodes in the network)
-
-
-
-
-# send_packet()
-# receive_packet()
-# node2.close()
+    except Exception as e:
+        print("NODE 2 EXITED")
