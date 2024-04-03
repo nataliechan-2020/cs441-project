@@ -1,6 +1,11 @@
 # CS441 Project
-We will be using the main folder
-```cd main``` in the terminal before running any command
+We will be using the main folder, run
+```cd main``` in the terminal first before running any command
+
+## Pre-Requisites
+* python 3
+* pip
+
 ## Installation
 ``` pip install -r requirements.txt```
 
