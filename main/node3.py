@@ -1,7 +1,7 @@
 import socket
 import time
 import threading
-from functions import send_node
+from functions import send_node, decrypt
 from logs import log_ip, log_protocol, sniffing_log, blocked_data
 
 # initialise IP and MAC addresses
@@ -26,6 +26,9 @@ router_mac = "R2"
 node2_mac = "N2"
 node1_ip = "0x1A"
 node2_ip = "0x2A"
+
+key = str.encode("1234567812345678")
+# key = get_random_bytes(16) 
 
 # next hop
 arp_mac = {node1_ip : router_mac, node2_ip : node2_mac, node3_ip: node3_mac}
@@ -93,6 +96,9 @@ def receive_packet(node):
         protocol = received_message[5]
         data_length = received_message[6]
         data = received_message[7]
+
+   
+
         # receive from node2
         # except TimeoutError: 
         #     received_message = intra3.recv(1024)
@@ -111,6 +117,13 @@ def receive_packet(node):
         protocol_flag = data[0]
         # data = data[1:len(data)-2]
         data = data[1:]
+        try:
+            # data = data.decode()
+            data = decrypt(data, key)
+            data = data.decode('utf-8')
+        except Exception as e:
+            print(data)
+
 
         if sorc_ip in blocked_ips and sorc_ip!=node3_ip:
             print("FIREWALL BLOCKED")

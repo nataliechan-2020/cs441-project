@@ -1,4 +1,26 @@
 from logs import flag_ip_spoofing, log
+import base64
+
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
+from Crypto.Random import get_random_bytes
+
+def encrypt(plaintext, key):
+    cipher = AES.new(key, AES.MODE_ECB)
+    padtext = pad(plaintext, AES.block_size)
+    ctext = cipher.encrypt(padtext)
+    encodedctext= base64.b64encode(ctext)
+    return encodedctext
+
+def decrypt(ciphertext, key):
+    cipher = AES.new(key, AES.MODE_ECB)
+    decodedctext = base64.b64decode(ciphertext)
+    padded_plaintext = cipher.decrypt(decodedctext)
+    plaintext = unpad(padded_plaintext, AES.block_size)
+    return plaintext
+
+key = str.encode("1234567812345678")
+# key = get_random_bytes(16) 
 
 def receive_router (received_message, node, compare, arp_mac):
     received_message = received_message.split(',')
@@ -83,8 +105,14 @@ def send_node(node, ip1, ip2, current_ip, current_mac, router_mac, arp_mac, ethe
     else:
         IP_header = IP_header + current_ip + "," + dest_ip + "," + protocol
         ethernet_header = ethernet_header + current_mac + "," + arp_mac[dest_ip]
-
-    payload = IP_header + "," + str(data_length) + "," + data
+    
+    print(data)
+    protocol = data[0]
+    data= data[1:]
+    data = data.encode()
+    data = encrypt(data, key)
+    data = data.decode()
+    payload = IP_header + "," + str(data_length) + "," + protocol + data
     payload_length = len(payload) - 4
     packet = ethernet_header + "," + str(payload_length) + "," + payload
     

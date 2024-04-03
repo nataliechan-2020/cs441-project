@@ -1,8 +1,9 @@
 import socket
 import time
 import threading
-from functions import send_node
+from functions import send_node, decrypt
 from logs import sniffing_log
+
 
 # Initialise IP and MAC addresses
 node1_ip = "0x1A"
@@ -20,6 +21,10 @@ node1.connect(router)
 router_mac = "R1"
 node2_ip = "0x2A"
 node3_ip = "0x2B"
+key = str.encode("1234567812345678")
+# key = get_random_bytes(16) 
+
+
 
 def receive_packet():
     # print(received_msg)
@@ -51,6 +56,14 @@ def receive_packet():
 
         protocol_flag = data[0]
         data = data[1:]
+
+        try:
+            # data = data.decode()
+            data = decrypt(data, key)
+            data = data.decode('utf-8')
+        except Exception as e:
+            print(data)
+
 
         if dest_mac != node1_mac:
             print("\nPACKET DROPPED")
