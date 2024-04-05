@@ -60,7 +60,7 @@ def from_router():
                 print("\nPACKET DROPPED")
 
             # sniff
-            if dest_ip == node3_ip and sorc_ip == node1_ip and dest_mac!="N2":
+            elif dest_ip == node3_ip and sorc_ip == node1_ip and dest_mac!="N2":
                 print("\nINTERCEPTED PACKET:")
                 details(sorc_mac, sorc_ip, dest_mac, dest_ip, protocol, data_length, protocol_flag, data)
                 sniffing_log(data, sorc_ip, dest_ip, 2)
@@ -89,7 +89,6 @@ def from_router():
                     try:
                         node3.send(bytes(packet, "utf-8")) # to node 3, if connected
                     except Exception as e:
-                        print(e)
                         print("NODE 3 NOT FOUND")
 
                 elif protocol == "1" and protocol_flag == "K":
@@ -98,11 +97,9 @@ def from_router():
                     try:
                         node3.close()
                     except Exception as e:
-                        print(e)
                         print("NODE 3 NOT FOUND")
 
     except Exception as e:
-        print(e)
         print("NODE 2 EXITED")
 
 # receive from node3
@@ -128,7 +125,7 @@ def from_node3():
                 print("\nPACKET DROPPED")
 
             # sniffing attack
-            if dest_ip == node3_ip and sorc_ip == node1_ip and dest_mac!="N2":
+            elif dest_ip == node3_ip and sorc_ip == node1_ip and dest_mac!="N2":
                 print("\nINTERCEPTED PACKET:")
                 details(sorc_mac, sorc_ip, dest_mac, dest_ip, protocol, data_length, protocol_flag, data)
                 sniffing_log(data, sorc_ip, dest_ip, 2)
@@ -162,7 +159,6 @@ def from_node3():
                     node3.close()
 
     except Exception as e:
-        print(e)
         print("NODE 3 NOT FOUND")
 
 receive_from_router_thread = threading.Thread(target=from_router)
@@ -180,9 +176,7 @@ while True:
         try:
             node3.send(bytes(packet, "utf-8")) # goes to node3 (cos its sent to all nodes in the network)
         except Exception as e:
-            print(e)
             print("NODE 3 NOT FOUND")
 
     except Exception as e:
-        print(e)
         print("NODE 2 EXITED")

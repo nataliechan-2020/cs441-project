@@ -65,18 +65,18 @@ def receive_router (received_message, node, compare, arp_mac):
     sorc_mac, sorc_ip, payload_length, dest_mac, dest_ip, protocol, data_length, data = split_packet(received_message)
     packet_dropped = False
     
-    if node == 2 or node == 1 :
-        print(dest_mac)
-        print(compare)
-        if dest_mac != compare:
-            print("PACKET DROPPED")
-            packet_dropped = True
-    elif node == 3 or node == 4:
-        print(dest_mac)
-        print(compare)
-        if dest_ip != compare:
-            print("PACKET DROPPED")
-            packet_dropped = True
+    # if node == 2 or node == 1 :
+    if dest_mac != compare:
+        print("PACKET DROPPED")
+        packet_dropped = True
+
+    # elif node == 3 or node == 4:
+    #     print("node:", node)
+    #     print("dest ip:", dest_ip)
+    #     print("compare:", compare)
+    #     if dest_ip != compare:
+    #         print("PACKET DROPPED")
+    #         packet_dropped = True
 
     if packet_dropped == False:
         if (arp_mac[sorc_ip] != sorc_mac):

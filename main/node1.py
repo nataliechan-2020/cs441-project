@@ -90,7 +90,6 @@ def from_router():
                     try:
                         node4.send(bytes(packet, "utf-8")) # to node 4, if connected
                     except Exception as e:
-                        print(e)
                         print("NODE 4 NOT FOUND")
 
                 elif protocol == "1" and protocol_flag == "K":
@@ -99,11 +98,9 @@ def from_router():
                     try:
                         node4.close()
                     except Exception as e:
-                        print(e)
                         print("NODE 3 NOT FOUND")
         
     except Exception as e:
-        print(e)
         print("NODE 1 EXITED")
 
 def from_node4():
@@ -159,7 +156,6 @@ def from_node4():
                     node1.close()
         
     except Exception as e:
-        print(e)
         print("NODE 4 NOT FOUND")
 
 receive_from_router_thread = threading.Thread(target=from_router)
@@ -178,10 +174,8 @@ while True:
         try:
             node4.send(bytes(packet, "utf-8")) # goes to node4 (cos its sent to all nodes in the network)
         except Exception as e:
-            print(e)
             print("NODE 4 NOT FOUND")
 
     except Exception as e:
-        print(e)
         print("NODE 1 EXITED")
 

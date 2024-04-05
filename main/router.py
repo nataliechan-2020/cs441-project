@@ -93,7 +93,7 @@ def from_node3(node3, arp_socket, arp_mac, router1_mac):
                 # Receive from node3
                 received_message = node3.recv(1024).decode("utf-8")
                 print("\n-- NODE 3 --")
-                sorc_mac, sorc_ip, payload_length, dest_mac, dest_ip, protocol, data_length, data, packet_dropped = receive_router(received_message, 3, node1_ip, arp_mac)
+                sorc_mac, sorc_ip, payload_length, dest_mac, dest_ip, protocol, data_length, data, packet_dropped = receive_router(received_message, 3, router2_mac, arp_mac)
                 if packet_dropped == False:
                     # Forward packet to node1
                     IP_header = sorc_ip + "," + dest_ip + "," +  protocol

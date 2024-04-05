@@ -141,7 +141,6 @@ def from_router():
                     try:
                         intra3.send(bytes(packet, "utf-8"))  # to node2, if connected
                     except Exception as e:
-                        print(e)
                         print("NODE 2 NOT FOUND")
 
                 elif protocol == "1" and protocol_flag == "K":
@@ -150,11 +149,9 @@ def from_router():
                     try:
                         intra3.close()
                     except Exception as e:
-                        print(e)
                         print("NODE 2 NOT FOUND")
     
     except Exception as e:
-        print(e)
         print("NODE 3 EXITED")
        
 # receive from node2
@@ -222,7 +219,6 @@ def from_node2():
                     intra3.close()
     
     except Exception as e:
-        print(e)
         print("NODE 2 NOT FOUND")
 
 # logs
@@ -269,8 +265,6 @@ while True:
             try:
                 intra3.send(bytes(packet, "utf-8"))
             except Exception as e:
-                print(e)
                 print("NODE 2 NOT FOUND")
     except Exception as e:
-        print(e)
         print("NODE 3 EXITED")

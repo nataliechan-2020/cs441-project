@@ -73,7 +73,6 @@ def from_router():
                     try:
                         intra4.send(bytes(packet, "utf-8"))  # to node2, if connected
                     except Exception as e:
-                        print(e)
                         print("NODE 1 NOT FOUND")
 
                 elif protocol == "1" and protocol_flag == "K":
@@ -82,11 +81,9 @@ def from_router():
                     try:
                         intra4.close()
                     except Exception as e:
-                        print(e)
                         print("NODE 1 NOT FOUND")
     
     except Exception as e:
-        print(e)
         print("NODE 4 EXITED")
 
 # receive from node2
@@ -135,7 +132,6 @@ def from_node1():
                     intra4.close()
     
     except Exception as e:
-        print(e)
         print("NODE 1 NOT FOUND")
 
 receive_from_router_thread = threading.Thread(target=from_router)
@@ -153,9 +149,7 @@ while True:
         try:
             intra4.send(bytes(packet, "utf-8"))
         except Exception as e:
-            print(e)
             print("NODE 1 NOT FOUND")
     
     except Exception as e:
-        print(e)
         print("NODE 4 EXITED")
