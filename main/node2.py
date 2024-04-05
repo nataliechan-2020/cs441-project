@@ -122,11 +122,11 @@ def from_node3():
                 print(data)
 
             # drop packet
-            if dest_mac != node2_mac:
-                print("\nPACKET DROPPED")
+            # if dest_mac != node2_mac:
+            #     print("\nPACKET DROPPED")
 
             # sniffing attack
-            elif dest_ip == node3_ip and sorc_ip == node1_ip and dest_mac!="N2":
+            if dest_ip == node3_ip and sorc_ip == node1_ip and dest_mac!="N2":
                 print("\nINTERCEPTED PACKET:")
                 details(sorc_mac, sorc_ip, dest_mac, dest_ip, protocol, data_length, protocol_flag, data)
                 sniffing_log(data, sorc_ip, dest_ip, 2)
@@ -134,7 +134,8 @@ def from_node3():
                 print("\nINTERCEPTED PACKET:")
                 details(sorc_mac, sorc_ip, dest_mac, dest_ip, protocol, data_length, protocol_flag, data)
                 sniffing_log(data, sorc_ip, dest_ip, 2)
-        
+            elif dest_mac != node2_mac:
+                print("\nPACKET DROPPED")
             else:
                 print("\nINCOMING PACKET:")
                 details(sorc_mac, sorc_ip, dest_mac, dest_ip, protocol, data_length, protocol_flag, data)
