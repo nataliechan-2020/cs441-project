@@ -238,12 +238,12 @@ while True:
 
         if option == 1:
             ip = input("Enter IP Address: ")
-            while ip != node1_ip and ip != node2_ip:
+            while ip != node1_ip and ip != node2_ip and ip !=node4_ip:
                 ip = input("Enter IP Address:")
             add_blocked_ip(ip)
         elif option == 2:
             ip = input("Enter IP Address: ")
-            while ip != node1_ip and ip != node2_ip:
+            while ip != node1_ip and ip != node2_ip and ip !=node4_ip:
                 ip = input("Enter IP Address:")
             remove_blocked_ip(ip)
         elif option == 3:

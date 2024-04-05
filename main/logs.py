@@ -22,7 +22,7 @@ def logs_details(type, msg):
 
 
 def alert(msg):
-    print (colored('ALERT: '+ msg, 'red'))
+    print (colored('\nALERT: '+ msg, 'red'))
     logs_details("warning", msg)
 
 def info(msg):
