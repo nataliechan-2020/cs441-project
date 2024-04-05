@@ -112,7 +112,7 @@ def from_node3(node3, arp_socket, arp_mac, router1_mac):
     except socket.error as e:
         print("Socket error:", e)
 
-def from_node4(node1, arp_socket, arp_mac, router2_mac):
+def from_node4(node4, arp_socket, arp_mac, router2_mac):
     try:
         while True:
             try:
