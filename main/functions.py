@@ -63,16 +63,17 @@ def details(sorc_mac, sorc_ip, dest_mac, dest_ip, protocol, data_length, protoco
 
 def receive_router (received_message, node, compare, arp_mac):
     sorc_mac, sorc_ip, payload_length, dest_mac, dest_ip, protocol, data_length, data = split_packet(received_message)
-
     packet_dropped = False
-    if node == 2:
+    
+    if node == 2 or node == 1 or node == 4:
         if dest_mac != compare:
             print("PACKET DROPPED")
             packet_dropped = True
-    elif node ==3:
+    elif node == 3:
         if dest_ip != compare:
             print("PACKET DROPPED")
-            packet_dropped = True 
+            packet_dropped = True
+
     if packet_dropped == False:
         if (arp_mac[sorc_ip] != sorc_mac):
             flag_ip_spoofing(sorc_ip, dest_ip)
@@ -90,7 +91,7 @@ def receive_router (received_message, node, compare, arp_mac):
     
     return sorc_mac, sorc_ip, payload_length, dest_mac, dest_ip, protocol, data_length, data, packet_dropped
 
-def send_node(node, ip1, ip2, current_ip, current_mac, router_mac, arp_mac, ethernet_header, IP_header):
+def send_node(node, ip1, ip2, ip3, current_ip, current_mac, arp_mac, ethernet_header, IP_header):
     
     data = input("Enter data: ")
     data_length = len(data)
@@ -105,7 +106,7 @@ def send_node(node, ip1, ip2, current_ip, current_mac, router_mac, arp_mac, ethe
         protocol = input("Enter protocol: ")
 
     dest_ip = input("Enter destination IP: ")
-    while dest_ip != ip1 and dest_ip != ip2:
+    while dest_ip != ip1 and dest_ip != ip2 and dest_ip != ip3:
         print("[ERROR] Wrong destination IP inputed")
         dest_ip = input("Enter destination IP: ")
 
@@ -117,10 +118,7 @@ def send_node(node, ip1, ip2, current_ip, current_mac, router_mac, arp_mac, ethe
     data_length = len(data)
     key = load_key()
 
-    if node == 1:
-        IP_header = IP_header + current_ip + "," + dest_ip + "," + protocol
-        ethernet_header = ethernet_header + current_mac + "," + router_mac
-    elif node ==2:
+    if node ==2:
         # print(ip1)
         # Spoofing START
         if dest_ip == ip1:

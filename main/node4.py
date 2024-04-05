@@ -1,11 +1,11 @@
 import socket
 import time
 import threading
-from functions import send_node, decrypt, load_key, split_packet, details, settings
+from functions import send_node, encrypt, decrypt, load_key, split_packet, details, settings
 from logs import log_ip, log_protocol, sniffing_log, blocked_data
 
 # Initialise IP and MAC addresses
-node4_ip = "0x4A"
+node4_ip = "0x1B"
 node4_mac = "N4"
 
 # Socket
@@ -58,17 +58,22 @@ def from_router():
                 print("\nINCOMING PACKET:")
                 details(sorc_mac, sorc_ip, dest_mac, dest_ip, protocol, data_length, protocol_flag, data)
                 if protocol == "0" and protocol_flag == "P":
-                    data = "R" + data
+                    protocol_flag = "R"
+                    data = data.encode()
+                    data = encrypt(data, key)
+                    data = data.decode()
+                    
                     ethernet_header = node4_mac + "," + arp_mac[sorc_ip]
                     IP_header = node4_ip + "," + sorc_ip + "," + protocol
 
-                    payload = IP_header + "," + data_length + "," + data
+                    payload = IP_header + "," + data_length + "," + protocol_flag + data
                     payload_length = len(payload) - 4
                     packet = ethernet_header + "," + str(payload_length) + "," + payload
                     node4.send(bytes(packet, "utf-8")) # to router
                     try:
                         intra4.send(bytes(packet, "utf-8"))  # to node2, if connected
                     except Exception as e:
+                        print(e)
                         print("NODE 1 NOT FOUND")
 
                 elif protocol == "1" and protocol_flag == "K":
@@ -77,9 +82,11 @@ def from_router():
                     try:
                         intra4.close()
                     except Exception as e:
+                        print(e)
                         print("NODE 1 NOT FOUND")
     
     except Exception as e:
+        print(e)
         print("NODE 4 EXITED")
 
 # receive from node2
@@ -107,11 +114,15 @@ def from_node1():
                 print("\nINCOMING PACKET:")
                 details(sorc_mac, sorc_ip, dest_mac, dest_ip, protocol, data_length, protocol_flag, data)
                 if protocol == "0" and protocol_flag == "P":
-                    data = "R" + data
+                    protocol_flag = "R"
+                    data = data.encode()
+                    data = encrypt(data, key)
+                    data = data.decode()
+
                     ethernet_header = node4_mac + "," + arp_mac[sorc_ip]
                     IP_header = node4_ip + "," + sorc_ip + "," + protocol
 
-                    payload = IP_header + "," + data_length + "," + data
+                    payload = IP_header + "," + data_length + "," + protocol_flag + data
                     payload_length = len(payload) - 4
                     packet = ethernet_header + "," + str(payload_length) + "," + payload
                     
@@ -124,19 +135,27 @@ def from_node1():
                     intra4.close()
     
     except Exception as e:
+        print(e)
         print("NODE 1 NOT FOUND")
 
-    while True:
+receive_from_router_thread = threading.Thread(target=from_router)
+receive_from_node1_thread = threading.Thread(target=from_node1)
+receive_from_router_thread.start()
+receive_from_node1_thread.start()
+
+while True:
+    try:
+        print("\nOUTGOING PACKET:")
+        ethernet_header = ""
+        IP_header = ""
+        packet = send_node(1, node1_ip, node2_ip, node3_ip, node4_ip, node4_mac, arp_mac, ethernet_header, IP_header)
+        node4.send(bytes(packet, "utf-8"))
         try:
-            print("\nOUTGOING PACKET:")
-            ethernet_header = ""
-            IP_header = ""
-            packet = send_node(1, node1_ip, node2_ip, node3_ip, node4_ip, node4_mac, router_mac, None, ethernet_header, IP_header)
-            node4.send(bytes(packet, "utf-8"))
-            try:
-                intra4.send(bytes(packet, "utf-8"))
-            except Exception as e:
-                print("NODE 1 NOT FOUND")
-        
+            intra4.send(bytes(packet, "utf-8"))
         except Exception as e:
-                print("NODE 4 EXITED")
+            print(e)
+            print("NODE 1 NOT FOUND")
+    
+    except Exception as e:
+        print(e)
+        print("NODE 4 EXITED")

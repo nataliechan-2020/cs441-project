@@ -1,7 +1,7 @@
 import socket
 import time
 import threading
-from functions import send_node, decrypt, load_key, split_packet, details
+from functions import send_node, encrypt, decrypt, load_key, split_packet, details
 from logs import sniffing_log
 
 # Initialise IP and MAC addresses
@@ -73,11 +73,15 @@ def from_router():
                 print("\nINCOMING PACKET:")
                 details(sorc_mac, sorc_ip, dest_mac, dest_ip, protocol, data_length, protocol_flag, data)
                 if protocol == "0" and protocol_flag == "P":
-                    data = "R" + data
+                    protocol_flag = "R"
+                    data = data.encode()
+                    data = encrypt(data, key)
+                    data = data.decode()
+
                     ethernet_header = node2_mac + "," + arp_mac[sorc_ip]
                     IP_header = node2_ip + "," + sorc_ip + "," +  protocol
 
-                    payload = IP_header + "," + data_length + "," + data
+                    payload = IP_header + "," + data_length + "," + protocol_flag + data
                     payload_length = len(payload) - 4
                     packet = ethernet_header + "," + str(payload_length) + "," + payload
                     
@@ -85,6 +89,7 @@ def from_router():
                     try:
                         node3.send(bytes(packet, "utf-8")) # to node 3, if connected
                     except Exception as e:
+                        print(e)
                         print("NODE 3 NOT FOUND")
 
                 elif protocol == "1" and protocol_flag == "K":
@@ -93,9 +98,11 @@ def from_router():
                     try:
                         node3.close()
                     except Exception as e:
+                        print(e)
                         print("NODE 3 NOT FOUND")
 
     except Exception as e:
+        print(e)
         print("NODE 2 EXITED")
 
 # receive from node3
@@ -134,11 +141,15 @@ def from_node3():
                 print("\nINCOMING PACKET:")
                 details(sorc_mac, sorc_ip, dest_mac, dest_ip, protocol, data_length, protocol_flag, data)
                 if protocol == "0" and protocol_flag == "P":
-                    data = "R" + data
+                    protocol_flag = "R"
+                    data = data.encode()
+                    data = encrypt(data, key)
+                    data = data.decode()
+                    
                     ethernet_header = node2_mac + "," + arp_mac[sorc_ip]
                     IP_header = node2_ip + "," + sorc_ip + "," +  protocol
 
-                    payload = IP_header + "," + data_length + "," + data
+                    payload = IP_header + "," + data_length + "," + protocol_flag + data
                     payload_length = len(payload) - 4
                     packet = ethernet_header + "," + str(payload_length) + "," + payload
                     
@@ -151,6 +162,7 @@ def from_node3():
                     node3.close()
 
     except Exception as e:
+        print(e)
         print("NODE 3 NOT FOUND")
 
 receive_from_router_thread = threading.Thread(target=from_router)
@@ -163,12 +175,14 @@ while True:
         print("\nOUTGOING PACKET:")
         ethernet_header = ""
         IP_header = ""
-        packet = send_node(2, node1_ip, node3_ip, node2_ip, node2_mac, None, arp_mac, ethernet_header, IP_header)
+        packet = send_node(2, node1_ip, node3_ip, node4_ip, node2_ip, node2_mac, arp_mac, ethernet_header, IP_header)
         node2.send(bytes(packet, "utf-8")) # goes to router
         try:
             node3.send(bytes(packet, "utf-8")) # goes to node3 (cos its sent to all nodes in the network)
         except Exception as e:
+            print(e)
             print("NODE 3 NOT FOUND")
 
     except Exception as e:
+        print(e)
         print("NODE 2 EXITED")
