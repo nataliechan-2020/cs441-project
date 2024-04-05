@@ -26,13 +26,14 @@ router_mac = "R2"
 node2_mac = "N2"
 node1_ip = "0x1A"
 node2_ip = "0x2A"
+node4_ip = "0x1B"
 
 # key = str.encode("1234567812345678")
 # key = get_random_bytes(16) 
 key = load_key()
 
 # next hop
-arp_mac = {node1_ip : router_mac, node2_ip : node2_mac, node3_ip: node3_mac}
+arp_mac = {node1_ip : router_mac, node2_ip : node2_mac, node4_ip: router_mac}
 
 # firewall
 blocked_ips = []
@@ -112,11 +113,11 @@ def from_router():
             elif dest_mac != node3_mac and dest_ip!=node3_ip:
                 print("\nPACKET DROPPED")
 
-            # # sniff
-            # elif dest_ip == node2_ip and sorc_ip ==node1_ip:
-            #     sniffing_log(data, sorc_ip, dest_ip, 3)
-            # elif dest_ip == node1_ip and sorc_ip == node2_ip:
-            #     sniffing_log(data, sorc_ip, dest_ip, 3)
+            # sniff
+            elif dest_ip == node2_ip and sorc_ip ==node1_ip:
+                sniffing_log(data, sorc_ip, dest_ip, 3)
+            elif dest_ip == node1_ip and sorc_ip == node2_ip:
+                sniffing_log(data, sorc_ip, dest_ip, 3)
 
             else:
                 # print(sorc_ip)
@@ -181,11 +182,11 @@ def from_node2():
             elif dest_mac != node3_mac and dest_ip!=node3_ip:
                 print("\nPACKET DROPPED")
 
-            # # sniff
-            # elif dest_ip == node2_ip and sorc_ip ==node1_ip:
-            #     sniffing_log(data, sorc_ip, dest_ip, 3)
-            # elif dest_ip == node1_ip and sorc_ip == node2_ip:
-            #     sniffing_log(data, sorc_ip, dest_ip, 3)
+            # sniff
+            elif dest_ip == node2_ip and sorc_ip ==node1_ip:
+                sniffing_log(data, sorc_ip, dest_ip, 3)
+            elif dest_ip == node1_ip and sorc_ip == node2_ip:
+                sniffing_log(data, sorc_ip, dest_ip, 3)
 
             else:
                 # if sorc_ip =="0x2B" or dest_ip == "0x2B":

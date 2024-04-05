@@ -31,8 +31,9 @@ router_mac = "R2"
 node3_mac = "N3"
 node1_ip = "0x1A"
 node3_ip = "0x2B"
+node4_ip = "0x1B"
 
-arp_mac = {node1_ip : router_mac, node3_ip : node3_mac}
+arp_mac = {node1_ip : router_mac, node3_ip : node3_mac, node4_ip : router_mac}
 # key = str.encode("1234567812345678")
 # key = get_random_bytes(16) 
 
