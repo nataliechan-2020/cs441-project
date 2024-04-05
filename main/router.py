@@ -33,60 +33,72 @@ counter = initialize_counter()
 def from_node1(node1, arp_socket, arp_mac, router2_mac):
     try:
         while True:
-            # Receive from node1
-            received_message = node1.recv(1024).decode("utf-8")
-            print("\n-- NODE 1 ---")
-            # print(received_message)
-            sorc_mac, sorc_ip, payload_length, dest_mac, dest_ip, protocol, data_length, data, packet_dropped = receive_router(received_message, 1, None, arp_mac)
+            try:
+                # Receive from node1
+                received_message = node1.recv(1024).decode("utf-8")
+                print("\n-- NODE 1 ---")
+                # print(received_message)
+                sorc_mac, sorc_ip, payload_length, dest_mac, dest_ip, protocol, data_length, data, packet_dropped = receive_router(received_message, 1, None, arp_mac)
 
-            # Forward packet to node2
-            IP_header = sorc_ip + "," + dest_ip + "," + protocol
-            # print(dest_ip)
-            ethernet_header = router2_mac + "," + arp_mac[dest_ip]
-            packet = ethernet_header + "," + payload_length + "," + IP_header + "," + data_length + "," + data
-            dest = arp_socket[node2_mac]
-            dest.send(bytes(packet, "utf-8"))
+                # Forward packet to node2
+                IP_header = sorc_ip + "," + dest_ip + "," + protocol
+                # print(dest_ip)
+                ethernet_header = router2_mac + "," + arp_mac[dest_ip]
+                packet = ethernet_header + "," + payload_length + "," + IP_header + "," + data_length + "," + data
+                dest = arp_socket[node2_mac]
+                dest.send(bytes(packet, "utf-8"))
 
-            # Forward packet to node3
-            dest = arp_socket[node3_mac]
-            dest.send(bytes(packet, "utf-8"))
-            print(counter())
+                # Forward packet to node3
+                dest = arp_socket[node3_mac]
+                dest.send(bytes(packet, "utf-8"))
+                print(counter())
+            except Exception as  e:
+                print("EXITED")
+                break
     except socket.error as e:
         print("Socket error:", e)
 
 def from_node2(node2, arp_socket, arp_mac, router1_mac):
     try:
         while True:
-            # Receive from node2
-            received_message = node2.recv(1024).decode("utf-8")
-            print("\n-- NODE 2 --")
-            # print(received_message)
-            sorc_mac, sorc_ip, payload_length, dest_mac, dest_ip, protocol, data_length, data, packet_dropped = receive_router(received_message, 2, router2_mac, arp_mac)
-            if packet_dropped == False:
-                # Send packet back to node1
-                IP_header = sorc_ip + "," + dest_ip + "," + protocol
-                ethernet_header = router1_mac + "," +  arp_mac[dest_ip]
-                packet = ethernet_header + "," + payload_length + "," + IP_header + "," + data_length + "," + data
-                dest = arp_socket[node1_mac]
-                dest.send(bytes(packet, "utf-8"))
-            print(counter())
+            try:
+                # Receive from node2
+                received_message = node2.recv(1024).decode("utf-8")
+                print("\n-- NODE 2 --")
+                # print(received_message)
+                sorc_mac, sorc_ip, payload_length, dest_mac, dest_ip, protocol, data_length, data, packet_dropped = receive_router(received_message, 2, router2_mac, arp_mac)
+                if packet_dropped == False:
+                    # Send packet back to node1
+                    IP_header = sorc_ip + "," + dest_ip + "," + protocol
+                    ethernet_header = router1_mac + "," +  arp_mac[dest_ip]
+                    packet = ethernet_header + "," + payload_length + "," + IP_header + "," + data_length + "," + data
+                    dest = arp_socket[node1_mac]
+                    dest.send(bytes(packet, "utf-8"))
+                print(counter())
+            except Exception as e:
+                print("EXITED")
+                break
     except socket.error as e:
         print("Socket error:", e)
 
 def from_node3(node3, arp_socket, node1_ip, router1_mac):
     try:
         while True:
-            # Receive from node3
-            received_message = node3.recv(1024).decode("utf-8")
-            print("\n-- NODE 3 --")
-            sorc_mac, sorc_ip, payload_length, dest_mac, dest_ip, protocol, data_length, data, packet_dropped = receive_router(received_message, 3, node1_ip, arp_mac)
-            if packet_dropped == False:
-                IP_header = sorc_ip + "," + dest_ip + "," +  protocol
-                ethernet_header = router1_mac + "," + node1_mac
-                packet = ethernet_header + "," + payload_length + "," + IP_header + "," + data_length + "," + data
-                dest = arp_socket[node1_mac]
-                dest.send(bytes(packet, "utf-8"))
-            print(counter())
+            try:
+                # Receive from node3
+                received_message = node3.recv(1024).decode("utf-8")
+                print("\n-- NODE 3 --")
+                sorc_mac, sorc_ip, payload_length, dest_mac, dest_ip, protocol, data_length, data, packet_dropped = receive_router(received_message, 3, node1_ip, arp_mac)
+                if packet_dropped == False:
+                    IP_header = sorc_ip + "," + dest_ip + "," +  protocol
+                    ethernet_header = router1_mac + "," + node1_mac
+                    packet = ethernet_header + "," + payload_length + "," + IP_header + "," + data_length + "," + data
+                    dest = arp_socket[node1_mac]
+                    dest.send(bytes(packet, "utf-8"))
+                print(counter())
+            except Exception as e:
+                print("EXITED")
+                break
     except socket.error as e:
         print("Socket error:", e)
 
