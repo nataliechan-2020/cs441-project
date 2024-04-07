@@ -68,6 +68,14 @@ def from_router():
                 print("\nINTERCEPTED PACKET:")
                 details(sorc_mac, sorc_ip, dest_mac, dest_ip, protocol, data_length, protocol_flag, data)
                 sniffing_log(data, sorc_ip, dest_ip, 2)
+            elif dest_ip == node3_ip and sorc_ip == node4_ip and dest_mac!="N2":
+                print("\nINTERCEPTED PACKET:")
+                details(sorc_mac, sorc_ip, dest_mac, dest_ip, protocol, data_length, protocol_flag, data)
+                sniffing_log(data, sorc_ip, dest_ip, 2)
+            elif dest_ip == node4_ip and sorc_ip == node3_ip and dest_mac!="N2":
+                print("\nINTERCEPTED PACKET:")
+                details(sorc_mac, sorc_ip, dest_mac, dest_ip, protocol, data_length, protocol_flag, data)
+                sniffing_log(data, sorc_ip, dest_ip, 2)
             elif dest_mac != node2_mac:
                 print("\nPACKET DROPPED")
             else:
@@ -131,6 +139,14 @@ def from_node3():
                 details(sorc_mac, sorc_ip, dest_mac, dest_ip, protocol, data_length, protocol_flag, data)
                 sniffing_log(data, sorc_ip, dest_ip, 2)
             elif dest_ip == node1_ip and sorc_ip == node3_ip and dest_mac!="N2":
+                print("\nINTERCEPTED PACKET:")
+                details(sorc_mac, sorc_ip, dest_mac, dest_ip, protocol, data_length, protocol_flag, data)
+                sniffing_log(data, sorc_ip, dest_ip, 2)
+            elif dest_ip == node4_ip and sorc_ip == node3_ip and dest_mac!="N2":
+                print("\nINTERCEPTED PACKET:")
+                details(sorc_mac, sorc_ip, dest_mac, dest_ip, protocol, data_length, protocol_flag, data)
+                sniffing_log(data, sorc_ip, dest_ip, 2)
+            elif dest_ip == node3_ip and sorc_ip == node4_ip and dest_mac!="N2":
                 print("\nINTERCEPTED PACKET:")
                 details(sorc_mac, sorc_ip, dest_mac, dest_ip, protocol, data_length, protocol_flag, data)
                 sniffing_log(data, sorc_ip, dest_ip, 2)
