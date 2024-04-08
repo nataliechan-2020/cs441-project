@@ -6,6 +6,7 @@ import base64
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 from Crypto.Random import get_random_bytes
+import time
 
 # Initialise IP and MAC addresses
 router1_ip = "0x11"
@@ -26,7 +27,8 @@ def initialize_counter():
         count[0]+=1
         if count[0] >= 20:
             print("EXIT")
-            raise SystemExit
+            time.sleep(10)
+            # raise SystemExit
         return count[0]
     return count_times
 counter = initialize_counter()
