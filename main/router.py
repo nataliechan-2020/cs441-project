@@ -28,10 +28,12 @@ def initialize_counter():
         if count[0] >= 20:
             print("WAIT FOR 10 SEC")
             time.sleep(10)
-            count = [0]
+            count[0]=0
             # raise SystemExit
         return count[0]
+
     return count_times
+
 counter = initialize_counter()
 
 def from_node1(node1, arp_socket, arp_mac, router2_mac):
