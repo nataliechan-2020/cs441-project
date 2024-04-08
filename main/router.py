@@ -26,7 +26,7 @@ def initialize_counter():
     def count_times():
         count[0]+=1
         if count[0] >= 20:
-            print("EXIT")
+            print("WAIT FOR 10 SEC")
             time.sleep(10)
             # raise SystemExit
         return count[0]
