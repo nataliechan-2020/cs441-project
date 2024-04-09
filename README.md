@@ -13,5 +13,7 @@ We will be using the main folder, run
 Open a new terminal for each step and run them in order:
 1. ```python router.py```
 2. ```python node1.py```
-3. ```python node2.py```
-4. ```python node3.py```
+3. ```python node4.py```
+4. ```python node2.py```
+5. ```python node3.py```
+
